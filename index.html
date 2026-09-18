@@ -274,6 +274,66 @@
     padding-top: 12px;
   }
 
+  .trivia {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 24px;
+  }
+
+  .trivia-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 12px;
+  }
+
+  .trivia-question {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 14px;
+    line-height: 1.5;
+  }
+
+  .trivia-reveal-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--accent);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .trivia-reveal-btn:hover { text-decoration: underline; }
+  .trivia-reveal-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .trivia-answer {
+    margin: 14px 0 0;
+    padding-top: 14px;
+    border-top: 1px solid var(--card-border);
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    display: none;
+  }
+
+  .trivia-answer.shown {
+    display: block;
+    animation: trivia-fade-in 0.25s ease;
+  }
+
+  @keyframes trivia-fade-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   .confetti-piece {
     position: fixed;
     top: -12px;
@@ -331,6 +391,13 @@
         <span class="app-link">Open app &rarr;</span>
       </a>
     </div>
+
+    <section class="trivia" id="trivia">
+      <p class="trivia-eyebrow">Tech Trivia of the Day</p>
+      <p class="trivia-question" id="triviaQuestion"></p>
+      <button class="trivia-reveal-btn" id="triviaRevealBtn" type="button">Reveal answer &rarr;</button>
+      <p class="trivia-answer" id="triviaAnswer"></p>
+    </section>
 
     <footer>Sign in with your Riverbend Schools account when prompted.</footer>
   </div>
@@ -434,6 +501,83 @@
         logoWrap.classList.add('spin');
         setTimeout(function () { logoWrap.classList.remove('spin'); }, 1200);
       }
+    })();
+
+    // Tech trivia of the day -- no backend, so "daily" just means the
+    // pick is seeded by today's date (day of year), the same for every
+    // visitor on a given day, cycling through the list on repeat forever
+    // with zero upkeep.
+    (function () {
+      var trivia = [
+        { q: 'What does "HTTP" stand for?', a: 'HyperText Transfer Protocol.' },
+        { q: 'In what year was the first iPhone released?', a: '2007.' },
+        { q: 'What does "CPU" stand for?', a: 'Central Processing Unit.' },
+        { q: 'What was the first widely-used web browser, released in 1993?', a: 'Mosaic.' },
+        { q: 'What does "URL" stand for?', a: 'Uniform Resource Locator.' },
+        { q: 'Who is credited as the co-founder of Apple alongside Steve Jobs?', a: 'Steve Wozniak.' },
+        { q: 'What does "RAM" stand for?', a: 'Random Access Memory.' },
+        { q: 'What programming language is named after a type of coffee?', a: 'Java.' },
+        { q: 'What year was Google founded?', a: '1998.' },
+        { q: 'What does "USB" stand for?', a: 'Universal Serial Bus.' },
+        { q: 'What was the first computer virus to spread widely on the internet, in 1988?', a: 'The Morris Worm.' },
+        { q: 'What does "GIF" stand for?', a: 'Graphics Interchange Format.' },
+        { q: 'What company created the Android operating system before Google acquired it?', a: 'Android Inc.' },
+        { q: 'What does "Wi-Fi" actually stand for?', a: 'Nothing -- it\'s not an acronym, just a brand name coined to sound like "Hi-Fi".' },
+        { q: 'What was the world\'s first search engine, launched in 1990?', a: 'Archie.' },
+        { q: 'What does "HTML" stand for?', a: 'HyperText Markup Language.' },
+        { q: 'What company originally developed the QWERTY keyboard layout?', a: 'Remington (for the Sholes and Glidden typewriter).' },
+        { q: 'What does "PDF" stand for?', a: 'Portable Document Format.' },
+        { q: 'The name "Macintosh" comes from a variety of what fruit?', a: 'Apple -- specifically the McIntosh apple (the spelling was tweaked to avoid a trademark conflict).' },
+        { q: 'What does "SSD" stand for?', a: 'Solid State Drive.' },
+        { q: 'Who is considered the "father of the World Wide Web"?', a: 'Tim Berners-Lee.' },
+        { q: 'What does "VPN" stand for?', a: 'Virtual Private Network.' },
+        { q: 'What was the first item ever sold on eBay?', a: 'A broken laser pointer.' },
+        { q: 'What does "IP" stand for in "IP address"?', a: 'Internet Protocol.' },
+        { q: 'What company made the first commercially successful graphical web browser, Netscape Navigator?', a: 'Netscape Communications.' },
+        { q: 'What does "LAN" stand for?', a: 'Local Area Network.' },
+        { q: 'What was the name of the first computer mouse\'s inventor?', a: 'Douglas Engelbart.' },
+        { q: 'What does "SQL" stand for?', a: 'Structured Query Language.' },
+        { q: 'What year did YouTube launch?', a: '2005.' },
+        { q: 'What does "CAPTCHA" stand for?', a: 'Completely Automated Public Turing test to tell Computers and Humans Apart.' },
+        { q: 'What was the first version of Windows to include the Start menu?', a: 'Windows 95.' },
+        { q: 'What does "GPU" stand for?', a: 'Graphics Processing Unit.' },
+        { q: 'What company originally created the Chromebook\'s operating system, Chrome OS?', a: 'Google.' },
+        { q: 'What does "DNS" stand for?', a: 'Domain Name System.' },
+        { q: 'What was the bestselling video game console of all time (as of the mid-2020s)?', a: 'The Sony PlayStation 2.' },
+        { q: 'What does "AI" stand for?', a: 'Artificial Intelligence.' },
+        { q: 'What was the first social media platform to reach 1 billion users?', a: 'Facebook.' },
+        { q: 'What does "JPEG" stand for?', a: 'Joint Photographic Experts Group.' },
+        { q: 'What company developed the first widely used spreadsheet software, VisiCalc?', a: 'Software Arts.' },
+        { q: 'What does "ISP" stand for?', a: 'Internet Service Provider.' },
+        { q: 'What was the name of the first computer built entirely from transistors?', a: 'The TRADIC (Bell Labs, 1954).' },
+        { q: 'What does "Bluetooth" have to do with teeth? (Trick one -- what\'s it actually named after?)', a: 'A 10th-century Danish king, Harald "Bluetooth" Gormsson, known for uniting rival tribes -- just as the tech unites devices.' },
+        { q: 'What does "RGB" stand for in screen colors?', a: 'Red, Green, Blue.' },
+        { q: 'What was the first widely available touchscreen smartphone before the iPhone?', a: 'The IBM Simon (1994).' },
+        { q: 'What does "OS" stand for?', a: 'Operating System.' },
+        { q: 'What company created the first popular email service, Hotmail?', a: 'Hotmail Corporation (later acquired by Microsoft).' },
+        { q: 'What does "FAQ" stand for?', a: 'Frequently Asked Questions.' },
+        { q: 'What was the first programming language considered "high-level," developed in the 1950s?', a: 'FORTRAN.' },
+        { q: 'What does "ASCII" stand for?', a: 'American Standard Code for Information Interchange.' },
+        { q: 'What tech company\'s logo has never included the company\'s actual name?', a: 'Apple.' }
+      ];
+
+      var qEl = document.getElementById('triviaQuestion');
+      var aEl = document.getElementById('triviaAnswer');
+      var btn = document.getElementById('triviaRevealBtn');
+      if (!qEl || !aEl || !btn) return;
+
+      var now = new Date();
+      var startOfYear = new Date(now.getFullYear(), 0, 0);
+      var dayOfYear = Math.floor((now - startOfYear) / 86400000);
+      var pick = trivia[dayOfYear % trivia.length];
+
+      qEl.textContent = pick.q;
+      aEl.textContent = pick.a;
+
+      btn.addEventListener('click', function () {
+        var isShown = aEl.classList.toggle('shown');
+        btn.innerHTML = isShown ? 'Hide answer' : 'Reveal answer &rarr;';
+      });
     })();
   </script>
 </body>
