@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chromebook Inventory · Tech Apps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root {
+    --ink: #1A1613;
+    --ink-soft: #6B6357;
+    --paper: #F4F0E6;
+    --card-border: #E2DAC7;
+    --accent: #B5121B;
+    --accent-ink: #FFFFFF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #EDE7D8;
+      --ink-soft: #B4AC97;
+      --paper: #14120F;
+      --card-border: #392F24;
+      --accent: #E4525C;
+      --accent-ink: #1A0C0D;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #EDE7D8;
+    --ink-soft: #B4AC97;
+    --paper: #14120F;
+    --card-border: #392F24;
+    --accent: #E4525C;
+    --accent-ink: #1A0C0D;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--paper);
+    font-family: 'Public Sans', system-ui, sans-serif;
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    height: 48px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--card-border);
+    color: var(--ink);
+  }
+
+  .bar a.back {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .bar a.back:hover { color: var(--accent); }
+
+  .bar .title {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+  }
+
+  iframe {
+    display: block;
+    width: 100%;
+    height: calc(100vh - 48px);
+    border: none;
+  }
+
+  #directLink {
+    position: fixed;
+    bottom: 14px;
+    right: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    background: var(--accent);
+    color: var(--accent-ink);
+    padding: 8px 14px;
+    border-radius: 20px;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+  }
+
+  #directLink:hover { filter: brightness(1.08); }
+</style>
+</head>
+<body>
+  <div class="bar">
+    <a class="back" href="../">&larr; All apps</a>
+    <span class="title">Chromebook Inventory</span>
+  </div>
+
+  <!-- Cross-origin iframes fire "load" even when they show a blocked/
+       sign-in error page, not just on real success -- so this can't
+       reliably detect success/failure and hide itself. It just stays a
+       small, always-present way out if the frame above it isn't working. -->
+  <iframe
+    src="https://script.google.com/a/macros/riverbendschools.net/s/AKfycbw2p5VYV_pI8bNqOA_gzTXEXxWM5qHwCWp0h4pJUUozi9fkxhwIC8D7etqxm_ujKyEQ/exec"
+    title="Chromebook Inventory">
+  </iframe>
+  <a id="directLink"
+     href="https://script.google.com/a/macros/riverbendschools.net/s/AKfycbw2p5VYV_pI8bNqOA_gzTXEXxWM5qHwCWp0h4pJUUozi9fkxhwIC8D7etqxm_ujKyEQ/exec"
+     target="_blank" rel="noopener">
+    Not loading? Open directly &rarr;
+  </a>
+</body>
+</html>
