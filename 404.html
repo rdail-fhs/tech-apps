@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page not found · Tech Apps</title>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<script>
+  (function () {
+    try {
+      var stored = localStorage.getItem('theme');
+      if (stored === 'light' || stored === 'dark') {
+        document.documentElement.setAttribute('data-theme', stored);
+      }
+    } catch (e) {}
+  })();
+</script>
+<style>
+  :root {
+    --ink: #1A1613;
+    --ink-soft: #6B6357;
+    --paper: #F4F0E6;
+    --card: #FFFFFF;
+    --card-border: #E2DAC7;
+    --accent: #F32000;
+    --focus: #B08D2E;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #EDE7D8;
+      --ink-soft: #B4AC97;
+      --paper: #14120F;
+      --card: #201C17;
+      --card-border: #392F24;
+      --accent: #F32000;
+      --focus: #D9B84E;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #EDE7D8;
+    --ink-soft: #B4AC97;
+    --paper: #14120F;
+    --card: #201C17;
+    --card-border: #392F24;
+    --accent: #F32000;
+    --focus: #D9B84E;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Public Sans', system-ui, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .wrap {
+    max-width: 420px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .logo-wrap {
+    position: relative;
+    width: 96px;
+    height: 96px;
+  }
+
+  .logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    animation: drift 3.4s ease-in-out infinite;
+  }
+
+  @keyframes drift {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-6px) rotate(2deg); }
+  }
+
+  .steam-puff {
+    position: absolute;
+    top: 8px;
+    left: 54px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ink-soft);
+    opacity: 0;
+    pointer-events: none;
+    animation: steam-rise 3.2s ease-in infinite;
+  }
+
+  .steam-puff:nth-child(2) { left: 54px; animation-delay: 0s; }
+  .steam-puff:nth-child(3) { left: 62px; animation-delay: 1.05s; }
+  .steam-puff:nth-child(4) { left: 58px; animation-delay: 2.1s; }
+
+  @keyframes steam-rise {
+    0% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+    18% { opacity: 0.5; }
+    100% { opacity: 0; transform: translate(-10px, -46px) scale(1.9); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .logo { animation: none; }
+    .steam-puff { display: none; }
+  }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0;
+  }
+
+  h1 {
+    font-size: clamp(22px, 5vw, 28px);
+    font-weight: 700;
+    margin: 0;
+  }
+
+  p.desc {
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .home-link {
+    margin-top: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-ink, #FFFFFF);
+    background: var(--accent);
+    padding: 10px 18px;
+    border-radius: 24px;
+    text-decoration: none;
+  }
+
+  .home-link:hover { filter: brightness(1.08); }
+  .home-link:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo-wrap">
+      <img class="logo" src="assets/steamers-logo-small.png" alt="Steamers logo">
+      <span class="steam-puff"></span>
+      <span class="steam-puff"></span>
+      <span class="steam-puff"></span>
+    </div>
+    <p class="eyebrow">404</p>
+    <h1>Looks like this page steamed off without us.</h1>
+    <p class="desc">Whatever you were looking for isn&rsquo;t at this address. Head back and try one of the apps from there.</p>
+    <a class="home-link" href="/">&larr; Back to Tech Apps</a>
+  </div>
+</body>
+</html>

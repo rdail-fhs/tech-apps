@@ -4,8 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chromebook Inventory · Tech Apps</title>
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<script>
+  (function () {
+    try {
+      var stored = localStorage.getItem('theme');
+      if (stored === 'light' || stored === 'dark') {
+        document.documentElement.setAttribute('data-theme', stored);
+      }
+    } catch (e) {}
+  })();
+</script>
 <style>
   :root {
     --ink: #1A1613;
@@ -70,7 +82,25 @@
   .bar .title {
     font-size: 13.5px;
     color: var(--ink-soft);
+    margin-right: auto;
+    padding-left: 12px;
   }
+
+  .theme-toggle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--card-border);
+    background: transparent;
+    color: var(--ink);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .theme-toggle:hover { border-color: var(--accent); }
 
   iframe {
     display: block;
@@ -101,6 +131,7 @@
   <div class="bar">
     <a class="back" href="../">&larr; All apps</a>
     <span class="title">Chromebook Inventory</span>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">&#9789;</button>
   </div>
 
   <!-- Cross-origin iframes fire "load" even when they show a blocked/
@@ -116,5 +147,27 @@
      target="_blank" rel="noopener">
     Not loading? Open directly &rarr;
   </a>
+
+  <script>
+    (function () {
+      var btn = document.getElementById('themeToggle');
+      function effectiveTheme() {
+        var stored = null;
+        try { stored = localStorage.getItem('theme'); } catch (e) {}
+        if (stored === 'light' || stored === 'dark') return stored;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      function updateIcon() {
+        btn.innerHTML = effectiveTheme() === 'dark' ? '&#9728;' : '&#9789;';
+      }
+      btn.addEventListener('click', function () {
+        var next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+        try { localStorage.setItem('theme', next); } catch (e) {}
+        document.documentElement.setAttribute('data-theme', next);
+        updateIcon();
+      });
+      updateIcon();
+    })();
+  </script>
 </body>
 </html>
