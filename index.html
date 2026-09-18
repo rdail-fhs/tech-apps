@@ -20,45 +20,45 @@
 </script>
 <style>
   :root {
-    --ink: #1A1613;
-    --ink-soft: #6B6357;
-    --paper: #F4F0E6;
+    --ink: #1A1A1A;
+    --ink-soft: #6E6E6E;
+    --paper: #F2F2F2;
     --card: #FFFFFF;
-    --card-border: #E2DAC7;
+    --card-border: #E0E0E0;
     --accent: #F32000;
     --accent-ink: #FFFFFF;
     --accent-soft: #FBDCD3;
-    --focus: #B08D2E;
+    --focus: #333333;
     --ok: #2C7A3F;
     --down: #B5121B;
   }
 
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --ink: #EDE7D8;
-      --ink-soft: #B4AC97;
-      --paper: #14120F;
-      --card: #201C17;
-      --card-border: #392F24;
+      --ink: #EDEDED;
+      --ink-soft: #A0A0A0;
+      --paper: #121212;
+      --card: #1E1E1E;
+      --card-border: #333333;
       --accent: #F32000;
-      --accent-ink: #1A0C0D;
-      --accent-soft: #4A2216;
-      --focus: #D9B84E;
+      --accent-ink: #1A1A1A;
+      --accent-soft: #3A1F1D;
+      --focus: #D9D9D9;
       --ok: #6FCB86;
       --down: #E4525C;
     }
   }
 
   :root[data-theme="dark"] {
-    --ink: #EDE7D8;
-    --ink-soft: #B4AC97;
-    --paper: #14120F;
-    --card: #201C17;
-    --card-border: #392F24;
+    --ink: #EDEDED;
+    --ink-soft: #A0A0A0;
+    --paper: #121212;
+    --card: #1E1E1E;
+    --card-border: #333333;
     --accent: #F32000;
-    --accent-ink: #1A0C0D;
-    --accent-soft: #4A2216;
-    --focus: #D9B84E;
+    --accent-ink: #1A1A1A;
+    --accent-soft: #3A1F1D;
+    --focus: #D9D9D9;
     --ok: #6FCB86;
     --down: #E4525C;
   }
@@ -415,7 +415,7 @@
       });
 
       function confettiBurst() {
-        var colors = ['#F32000', '#1A1613', '#F4F0E6', '#B4AC97'];
+        var colors = ['#F32000', '#1A1A1A', '#F2F2F2', '#A0A0A0'];
         for (var i = 0; i < 90; i++) {
           (function () {
             var el = document.createElement('div');
