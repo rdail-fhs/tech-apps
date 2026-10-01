@@ -1,0 +1,162 @@
+{
+  "interval_seconds": 60,
+  "services": [
+    {
+      "id": "google",
+      "name": "Google Workspace",
+      "type": "google",
+      "link": "https://www.google.com/appsstatus/dashboard/",
+      "desc": "Email, Drive, Docs, Meet and Classroom",
+      "logo": "assets/logos/google.png"
+    },
+    {
+      "id": "canvas",
+      "name": "Canvas",
+      "type": "statuspage",
+      "url": "https://status.instructure.com",
+      "desc": "Learning management system for courses and assignments",
+      "logo": "assets/logos/canvas.png"
+    },
+    {
+      "id": "clever",
+      "name": "Clever",
+      "type": "statuspage",
+      "url": "https://status.clever.com",
+      "desc": "Single sign-on and rostering for student apps",
+      "logo": "assets/logos/clever.png"
+    },
+    {
+      "id": "powerschool",
+      "name": "PowerSchool",
+      "type": "statuspage",
+      "url": "https://status.powerschool.com",
+      "desc": "Student information system: grades, attendance and enrollment",
+      "logo": "assets/logos/powerschool.png"
+    },
+    {
+      "id": "canva",
+      "name": "Canva",
+      "type": "statuspage",
+      "url": "https://www.canvastatus.com",
+      "desc": "Design tool for graphics, presentations and posters",
+      "logo": "assets/logos/canva.png"
+    },
+    {
+      "id": "papercut",
+      "name": "PaperCut",
+      "type": "statuspage",
+      "url": "https://status.papercut.com",
+      "desc": "Print management and tracking",
+      "logo": "assets/logos/papercut.png"
+    },
+    {
+      "id": "risevision",
+      "name": "Rise Vision",
+      "type": "http",
+      "url": "https://apps.risevision.com",
+      "desc": "Digital signage on classroom and hallway displays",
+      "logo": "assets/logos/risevision.png",
+      "link": "https://statusgator.com/services/rise-vision"
+    },
+    {
+      "id": "linewize",
+      "name": "Linewize",
+      "type": "statusio",
+      "desc": "Web filtering and classroom management",
+      "page_id": "57f7197c9d490a4723000d75",
+      "link": "https://status.linewize.net"
+    },
+    {
+      "id": "securly",
+      "name": "Securly",
+      "type": "statusio",
+      "desc": "Web filtering and student safety monitoring",
+      "logo": "assets/logos/securly.png",
+      "page_id": "5721276eb12b2e5843002acb",
+      "link": "https://status.securly.com"
+    },
+    {
+      "id": "cipa",
+      "name": "CIPAFilter",
+      "type": "http",
+      "url": "https://www.cipafilter.com",
+      "desc": "CIPA-compliant web content filtering"
+    },
+    {
+      "id": "amplify",
+      "name": "Amplify",
+      "type": "statuspage",
+      "url": "https://status.amplify.com",
+      "desc": "Reading, math and science curriculum and assessments",
+      "logo": "assets/logos/amplify.png"
+    },
+    {
+      "id": "gimkit",
+      "name": "Gimkit",
+      "type": "http",
+      "url": "https://www.gimkit.com",
+      "link": "https://status.gimkit.com",
+      "desc": "Game-based quizzes for classroom review",
+      "logo": "assets/logos/gimkit.png"
+    },
+    {
+      "id": "renaissance",
+      "name": "Renaissance",
+      "type": "statuspage",
+      "url": "https://status.renaissance.com",
+      "desc": "Star assessments, Accelerated Reader and myON",
+      "logo": "assets/logos/renaissance.png"
+    },
+    {
+      "id": "hmh",
+      "name": "HMH",
+      "type": "statuspage",
+      "url": "https://status.hmhco.com",
+      "desc": "Houghton Mifflin Harcourt digital curriculum and Ed",
+      "logo": "assets/logos/hmh.png"
+    },
+    {
+      "id": "ixl",
+      "name": "IXL",
+      "type": "http",
+      "url": "https://www.ixl.com",
+      "desc": "Practice and skills tracking in math, ELA, science and more",
+      "logo": "assets/logos/ixl.png",
+      "link": "https://status.ixl.com"
+    },
+    {
+      "id": "stukent",
+      "name": "Stukent",
+      "type": "http",
+      "url": "https://www.stukent.com",
+      "desc": "Business and marketing simulations and course content",
+      "logo": "assets/logos/stukent.png",
+      "link": "https://www.stukent.com/support"
+    },
+    {
+      "id": "codeorg",
+      "name": "Code.org",
+      "type": "instatus",
+      "url": "https://status.code.org",
+      "desc": "Computer science courses and Hour of Code",
+      "logo": "assets/logos/codeorg.png"
+    },
+    {
+      "id": "savvas",
+      "name": "Savvas",
+      "type": "statuspage",
+      "url": "https://status.savvas.com",
+      "desc": "Savvas Realize digital curriculum and assessments",
+      "logo": "assets/logos/savvas.png"
+    },
+    {
+      "id": "noredink",
+      "name": "NoRedInk",
+      "type": "http",
+      "url": "https://www.noredink.com",
+      "link": "https://noredinkstatus.com",
+      "desc": "Grammar and writing practice",
+      "logo": "assets/logos/noredink.png"
+    }
+  ]
+}

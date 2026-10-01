@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Service Status · Tech Apps</title>
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<script>
+  (function () {
+    try {
+      var stored = localStorage.getItem('theme');
+      if (stored === 'light' || stored === 'dark') {
+        document.documentElement.setAttribute('data-theme', stored);
+      }
+    } catch (e) {}
+  })();
+</script>
+<style>
+  :root {
+    --ink: #141414;
+    --paper-raised: #FFFFFF;
+    --canvas: #F5F3EF;
+    --red: #F32000;
+    --red-ink: #FFFFFF;
+    --red-tint: rgba(243, 32, 0, 0.08);
+    --red-tint-strong: rgba(243, 32, 0, 0.14);
+    --ink-tint: rgba(20, 20, 20, 0.05);
+    --muted: rgba(20, 20, 20, 0.58);
+    --border: rgba(20, 20, 20, 0.14);
+    --border-strong: #141414;
+    --ok: #2C7A3F;
+    --warn: #B7791F;
+    --down: #B5121B;
+    --maint: #2F6DB5;
+    --shadow-sm: 0 1px 2px rgba(20, 20, 20, 0.06);
+    --shadow-md: 0 8px 24px rgba(20, 20, 20, 0.10);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #F0EDE6;
+      --paper-raised: #1D1D1D;
+      --canvas: #101010;
+      --red: #FF4520;
+      --red-ink: #141414;
+      --red-tint: rgba(255, 69, 32, 0.14);
+      --red-tint-strong: rgba(255, 69, 32, 0.22);
+      --ink-tint: rgba(240, 237, 230, 0.08);
+      --muted: rgba(240, 237, 230, 0.58);
+      --border: rgba(240, 237, 230, 0.16);
+      --border-strong: #F0EDE6;
+      --ok: #6FCB86;
+      --warn: #E3B04B;
+      --down: #E4525C;
+      --maint: #6FA4E8;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #F0EDE6;
+    --paper-raised: #1D1D1D;
+    --canvas: #101010;
+    --red: #FF4520;
+    --red-ink: #141414;
+    --red-tint: rgba(255, 69, 32, 0.14);
+    --red-tint-strong: rgba(255, 69, 32, 0.22);
+    --ink-tint: rgba(240, 237, 230, 0.08);
+    --muted: rgba(240, 237, 230, 0.58);
+    --border: rgba(240, 237, 230, 0.16);
+    --border-strong: #F0EDE6;
+    --ok: #6FCB86;
+    --warn: #E3B04B;
+    --down: #E4525C;
+    --maint: #6FA4E8;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; background: var(--canvas); }
+
+  /* Same top bar as the other apps' wrapper pages */
+  .bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    height: 48px; padding: 0 16px;
+    border-bottom: 1px solid var(--border); color: var(--ink);
+    font-family: 'Public Sans', system-ui, sans-serif;
+  }
+  .bar a.back { font-size: 13.5px; font-weight: 600; color: var(--ink); text-decoration: none; }
+  .bar a.back:hover { color: var(--red); }
+  .bar .title { font-size: 13.5px; color: var(--muted); margin-right: auto; padding-left: 12px; }
+  .theme-toggle {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid var(--border); background: transparent; color: var(--ink);
+    font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .theme-toggle:hover { border-color: var(--red); }
+
+  /* App body: same look as the Ticket Dashboard / Inventory */
+  main {
+    font-family: 'Archivo', Arial, sans-serif;
+    max-width: 920px; margin: 0 auto; padding: 40px 20px 100px;
+    color: var(--ink); -webkit-font-smoothing: antialiased;
+  }
+
+  h1 { font-weight: 800; font-size: 28px; margin: 0 0 2px; letter-spacing: -0.01em; }
+  h1::before {
+    content: ''; display: inline-block; width: 10px; height: 10px;
+    background: var(--red); margin-right: 10px; vertical-align: middle;
+    transform: translateY(-2px);
+  }
+  h2 {
+    font-weight: 800; font-size: 16px; margin: 0 0 14px;
+    padding-bottom: 8px; border-bottom: 3px solid var(--red);
+    text-transform: uppercase; letter-spacing: 0.03em;
+  }
+
+  .header-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap; margin-bottom: 24px;
+  }
+  #updated { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  .active-count {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: var(--muted);
+    background: var(--paper-raised); border: 1.5px solid var(--border); border-radius: 3px;
+    padding: 9px 14px; box-shadow: var(--shadow-sm); white-space: nowrap;
+  }
+  .active-count strong { font-size: 16px; font-weight: 800; margin-right: 5px; color: var(--ok); }
+  .active-count.has-issues strong { color: var(--red); }
+
+  .banner {
+    background: var(--paper-raised); border: 1.5px solid var(--border-strong); border-top: 4px solid var(--ok);
+    border-radius: 4px; padding: 16px 20px; margin-bottom: 24px; box-shadow: var(--shadow-md);
+    font-weight: 700; font-size: 16px;
+  }
+  .banner.degraded { border-top-color: var(--warn); }
+  .banner.outage { border-top-color: var(--red); }
+  .banner.unknown { border-top-color: var(--muted); }
+
+  #serviceList { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+
+  .service-card {
+    display: flex; flex-direction: column;
+    border: 1.5px solid var(--border); border-radius: 4px; overflow: hidden;
+    background: var(--paper-raised); box-shadow: var(--shadow-sm);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+  }
+  .service-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+  /* Solid status-colored strip across the top of each tile */
+  .tile-top {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 9px 16px; background: var(--ok); color: var(--red-ink);
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .degraded .tile-top { background: var(--warn); }
+  .outage .tile-top { background: var(--red); color: var(--red-ink); }
+  .maintenance .tile-top { background: var(--maint); }
+  .unknown .tile-top { background: var(--muted); }
+  .tile-dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+
+  .tile-body { padding: 16px 16px 14px; display: flex; flex-direction: column; flex: 1; }
+  .tile-id { display: flex; align-items: center; gap: 12px; }
+  .logo {
+    width: 40px; height: 40px; flex: none; border-radius: 6px; padding: 4px;
+    background: #fff; border: 1px solid var(--border); object-fit: contain;
+  }
+  .logo-mono {
+    display: flex; align-items: center; justify-content: center; padding: 0;
+    background: var(--ink); color: var(--canvas); font-weight: 800; font-size: 18px;
+  }
+  .service-name { font-weight: 800; font-size: 19px; color: var(--ink); text-decoration: none; letter-spacing: -0.01em; }
+  .service-name:hover { color: var(--red); }
+  .service-about { font-size: 13px; color: var(--ink); margin-top: 4px; line-height: 1.4; }
+  .service-desc { font-size: 12.5px; color: var(--muted); margin-top: 10px; line-height: 1.45; }
+
+  .incident {
+    margin-top: 10px; padding: 8px 10px; font-size: 12.5px; line-height: 1.4;
+    background: var(--ink-tint); border-radius: 3px; border-left: 2px solid var(--red);
+  }
+  .incident a { color: var(--ink); text-decoration: none; font-weight: 600; }
+  .incident a:hover { color: var(--red); }
+
+  .card-meta {
+    margin-top: auto; padding-top: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted);
+    display: flex; flex-wrap: wrap; gap: 4px 12px;
+  }
+  .card-meta-wrap { margin-top: 14px; border-top: 1px solid var(--border); }
+
+  #errorState { color: var(--red); font-weight: 700; font-size: 13.5px; margin-top: 16px; }
+</style>
+</head>
+<body>
+  <div class="bar">
+    <a class="back" href="../">&larr; All apps</a>
+    <span class="title">Service Status</span>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">&#9789;</button>
+  </div>
+
+  <main>
+    <div class="header-row">
+      <div>
+        <h1>Service Status</h1>
+        <div id="updated">Loading&hellip;</div>
+      </div>
+      <div id="summaryCount" class="active-count" style="display:none;"></div>
+    </div>
+
+    <div id="banner" class="banner unknown">Checking services&hellip;</div>
+
+    <h2>Services</h2>
+    <div id="serviceList"></div>
+    <div id="errorState"></div>
+  </main>
+
+  <script>
+    (function () {
+      var LABEL = { operational: 'Operational', degraded: 'Degraded', outage: 'Outage', maintenance: 'Maintenance', unknown: 'Unknown' };
+      var RANK = { operational: 0, maintenance: 1, unknown: 2, degraded: 3, outage: 4 };
+      function esc(s) {
+        return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+      }
+      function ago(t) {
+        var s = Math.max(0, Math.round(Date.now() / 1000 - t));
+        return s < 90 ? s + 's ago' : s < 5400 ? Math.round(s / 60) + 'm ago' : Math.round(s / 3600) + 'h ago';
+      }
+
+      function logo(s) {
+        var mono = '<div class="logo logo-mono">' + esc(s.name.charAt(0)) + '</div>';
+        if (!s.logo) return mono;
+        return '<img class="logo" src="../' + esc(s.logo) + '" alt="" loading="lazy" ' +
+          'onerror="this.outerHTML=this.dataset.mono" data-mono="' + esc(mono) + '">';
+      }
+
+      function load() {
+        fetch('status.json?' + Date.now(), { cache: 'no-store' })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            var svcs = d.services.slice().sort(function (a, b) {
+              return RANK[b.status] - RANK[a.status] || a.name.localeCompare(b.name);
+            });
+            var bad = svcs.filter(function (s) { return s.status === 'degraded' || s.status === 'outage'; });
+            var worst = svcs.some(function (s) { return s.status === 'outage'; }) ? 'outage'
+              : bad.length ? 'degraded'
+              : svcs.some(function (s) { return s.status === 'unknown'; }) ? 'unknown' : 'operational';
+
+            var banner = document.getElementById('banner');
+            banner.className = 'banner ' + worst;
+            banner.textContent = bad.length
+              ? bad.length + ' service' + (bad.length > 1 ? 's' : '') + ' with issues'
+              : worst === 'unknown' ? 'Some services could not be checked' : 'All systems operational';
+
+            var count = document.getElementById('summaryCount');
+            count.style.display = '';
+            count.className = 'active-count' + (bad.length || svcs.some(function (s) { return s.status === 'unknown'; }) ? ' has-issues' : '');
+            var okCount = svcs.filter(function (s) { return s.status === 'operational'; }).length;
+            count.innerHTML = '<strong>' + okCount + '/' + svcs.length + '</strong>operational';
+
+            document.getElementById('serviceList').innerHTML = svcs.map(function (s) {
+              return '<div class="service-card ' + s.status + '">' +
+                '<div class="tile-top"><span>' + LABEL[s.status] + '</span><span class="tile-dot"></span></div>' +
+                '<div class="tile-body">' +
+                  '<div class="tile-id">' + logo(s) +
+                    '<div><a class="service-name" href="' + esc(s.link) + '" target="_blank" rel="noopener">' + esc(s.name) + '</a>' +
+                    (s.desc ? '<div class="service-about">' + esc(s.desc) + '</div>' : '') + '</div></div>' +
+                  '<div class="service-desc">' + esc(s.message) + '</div>' +
+                  s.incidents.map(function (i) {
+                    return '<div class="incident"><a href="' + esc(i.url) + '" target="_blank" rel="noopener">' + esc(i.name) + '</a></div>';
+                  }).join('') +
+                  s.components.map(function (c) {
+                    return '<div class="incident">' + esc(c.name) + ' &mdash; ' + LABEL[c.status] + '</div>';
+                  }).join('') +
+                  '<div class="card-meta-wrap"><div class="card-meta">' +
+                    (s.uptime == null ? '' : '<span>' + s.uptime + '% uptime (24h)</span>') +
+                    (s.note ? '<span>Website check</span>' : '<span>Vendor feed</span>') +
+                  '</div></div>' +
+                '</div>' +
+              '</div>';
+            }).join('');
+
+            document.getElementById('updated').textContent = 'Checked every 5 minutes · updated ' + ago(d.generated);
+            document.getElementById('errorState').textContent = '';
+          })
+          .catch(function () {
+            document.getElementById('errorState').textContent = 'Could not load status data.';
+          });
+      }
+      load();
+      setInterval(load, 60000);
+
+      var btn = document.getElementById('themeToggle');
+      function effectiveTheme() {
+        var stored = null;
+        try { stored = localStorage.getItem('theme'); } catch (e) {}
+        if (stored === 'light' || stored === 'dark') return stored;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      function updateIcon() { btn.innerHTML = effectiveTheme() === 'dark' ? '&#9728;' : '&#9789;'; }
+      btn.addEventListener('click', function () {
+        var next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+        try { localStorage.setItem('theme', next); } catch (e) {}
+        document.documentElement.setAttribute('data-theme', next);
+        updateIcon();
+      });
+      updateIcon();
+    })();
+  </script>
+</body>
+</html>
