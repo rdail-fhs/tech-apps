@@ -370,8 +370,17 @@
     transition: transform 0.4s ease;
   }
 
-  .good-luck-active .app-card,
-  .good-luck-active .trivia {
+  .pe-unit {
+    display: inline-block;
+  }
+
+  body.good-luck-active .pe-unit,
+  body.good-luck-active .app-card,
+  body.good-luck-active .trivia-option,
+  body.good-luck-active .theme-toggle,
+  body.good-luck-active .logo,
+  body.good-luck-active .app-icon,
+  body.good-luck-active .status-dot {
     transition: transform 0.12s ease-out;
   }
 
@@ -594,7 +603,8 @@
     })();
 
     // Typed-phrase easter eggs -- type any of these phrases anywhere on
-    // the page (no need to click into a field first).
+    // the page (no need to click into a field first). Esc is a panic
+    // button that turns every one of these off at once.
     (function () {
       var buffer = '';
       var maxLen = 24;
@@ -608,6 +618,10 @@
       ];
 
       document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          resetAllEffects();
+          return;
+        }
         if (e.key.length !== 1) return;
         buffer = (buffer + e.key.toLowerCase()).slice(-maxLen);
         triggers.forEach(function (t) {
@@ -617,6 +631,14 @@
           }
         });
       });
+
+      function resetAllEffects() {
+        document.body.classList.remove('barrel-roll', 'tilted');
+        stopGoodLuck();
+        exitSpace();
+        var overlay = document.getElementById('timeoutOverlay');
+        if (overlay) overlay.remove();
+      }
 
       function doBarrelRoll() {
         document.body.classList.remove('barrel-roll');
@@ -632,43 +654,113 @@
         document.body.classList.toggle('tilted');
       }
 
+      // Shared decomposition used by "good luck" and "Steamers in Space" --
+      // every button/card/logo/icon/dot is kept as one atomic unit (so it
+      // still has a single clickable hit-box and emoji/icons don't get
+      // split mid-character); every other bit of text on the page gets
+      // exploded into one <span> per letter so it can move independently.
+      // Built once and cached -- re-running it would double-wrap text.
+      var WHOLE_UNIT_SELECTOR = '.app-card, .trivia-option, .theme-toggle, .logo, .app-icon, .status-dot';
+      var scatterUnitsCache = null;
+
+      function getScatterUnits() {
+        if (scatterUnitsCache) return scatterUnitsCache;
+        var root = document.querySelector('.wrap');
+        var units = [];
+
+        Array.prototype.forEach.call(root.querySelectorAll(WHOLE_UNIT_SELECTOR), function (el) {
+          units.push(el);
+        });
+
+        var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+          acceptNode: function (node) {
+            if (!node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+            var p = node.parentElement;
+            while (p && p !== root) {
+              if (p.matches && p.matches(WHOLE_UNIT_SELECTOR)) return NodeFilter.FILTER_REJECT;
+              p = p.parentElement;
+            }
+            return NodeFilter.FILTER_ACCEPT;
+          }
+        });
+
+        var textNodes = [];
+        var n;
+        while ((n = walker.nextNode())) textNodes.push(n);
+
+        textNodes.forEach(function (node) {
+          var chars = Array.from(node.nodeValue);
+          var frag = document.createDocumentFragment();
+          chars.forEach(function (ch) {
+            if (ch.trim() === '') {
+              frag.appendChild(document.createTextNode(ch));
+            } else {
+              var span = document.createElement('span');
+              span.className = 'pe-unit';
+              span.textContent = ch;
+              frag.appendChild(span);
+              units.push(span);
+            }
+          });
+          node.parentNode.replaceChild(frag, node);
+        });
+
+        scatterUnitsCache = units;
+        return units;
+      }
+
+      // "Good luck" -- every unit flees the cursor and returns home the
+      // moment the cursor is far enough away. No timer: only re-typing the
+      // phrase or hitting Esc turns it off.
       var goodLuckActive = false;
-      var goodLuckTimer = null;
+      var goodLuckUnits = [];
+      var goodLuckMoveHandler = null;
+
       function goodLuck() {
-        var targets = document.querySelectorAll('.app-card, .trivia');
         if (goodLuckActive) {
-          clearTimeout(goodLuckTimer);
+          stopGoodLuck();
         } else {
-          goodLuckActive = true;
-          document.body.classList.add('good-luck-active');
-          document.addEventListener('mousemove', onGoodLuckMove);
+          startGoodLuck();
         }
+      }
 
-        goodLuckTimer = setTimeout(function () {
-          document.removeEventListener('mousemove', onGoodLuckMove);
-          document.body.classList.remove('good-luck-active');
-          targets.forEach(function (el) { el.style.transform = ''; });
-          goodLuckActive = false;
-        }, 7000);
+      function startGoodLuck() {
+        goodLuckActive = true;
+        document.body.classList.add('good-luck-active');
+        goodLuckUnits = getScatterUnits();
 
-        function onGoodLuckMove(e) {
-          targets.forEach(function (el) {
-            var rect = el.getBoundingClientRect();
-            var cx = rect.left + rect.width / 2;
-            var cy = rect.top + rect.height / 2;
-            var dx = cx - e.clientX;
-            var dy = cy - e.clientY;
+        goodLuckUnits.forEach(function (el) { el.style.transform = ''; });
+        goodLuckUnits.forEach(function (el) {
+          var r = el.getBoundingClientRect();
+          el.__homeX = r.left + r.width / 2;
+          el.__homeY = r.top + r.height / 2;
+        });
+
+        goodLuckMoveHandler = function (e) {
+          goodLuckUnits.forEach(function (el) {
+            var dx = el.__homeX - e.clientX;
+            var dy = el.__homeY - e.clientY;
             var dist = Math.sqrt(dx * dx + dy * dy);
-            var radius = 220;
+            var radius = 150;
             if (dist < radius && dist > 0.01) {
               var strength = (radius - dist) / radius;
-              var push = 90 * strength;
+              var push = 120 * strength;
               el.style.transform = 'translate(' + (dx / dist * push) + 'px,' + (dy / dist * push) + 'px)';
             } else {
               el.style.transform = '';
             }
           });
-        }
+        };
+        document.addEventListener('mousemove', goodLuckMoveHandler);
+      }
+
+      function stopGoodLuck() {
+        if (!goodLuckActive) return;
+        goodLuckActive = false;
+        document.removeEventListener('mousemove', goodLuckMoveHandler);
+        goodLuckMoveHandler = null;
+        goodLuckUnits.forEach(function (el) { el.style.transform = ''; });
+        document.body.classList.remove('good-luck-active');
       }
 
       function showTimeout() {
@@ -684,9 +776,14 @@
         });
       }
 
+      // "Steamers in Space" -- every unit (not just the app cards) floats
+      // free of gravity and is individually draggable. Skips pairwise
+      // collision between units (could be 150+ of them once text is
+      // exploded into letters) to keep this smooth on slower hardware --
+      // just wall-bounce plus drag-and-throw.
       var spaceModeActive = false;
       var spaceAnimId = null;
-      var spaceCards = [];
+      var spaceBodies = [];
       var spaceStars = [];
       var spaceCleanup = [];
 
@@ -700,42 +797,44 @@
 
       function enterSpace() {
         spaceModeActive = true;
-        var cards = document.querySelectorAll('.app-card');
+        var units = getScatterUnits();
 
-        spaceCards = Array.prototype.map.call(cards, function (el) {
+        spaceBodies = units.map(function (el) {
           var rect = el.getBoundingClientRect();
+          var isWhole = el.matches(WHOLE_UNIT_SELECTOR);
           el.style.position = 'fixed';
-          el.style.left = rect.left + 'px';
-          el.style.top = rect.top + 'px';
-          el.style.width = rect.width + 'px';
+          el.style.left = '0';
+          el.style.top = '0';
           el.style.margin = '0';
           el.style.zIndex = '500';
           el.style.cursor = 'grab';
-          var angle = Math.random() * Math.PI * 2;
-          var speed = 1.6 + Math.random() * 1.3;
+          if (isWhole) { el.style.width = rect.width + 'px'; }
 
-          var card = {
+          var angle = Math.random() * Math.PI * 2;
+          var speed = 1 + Math.random() * 1.6;
+          var body = {
             el: el, x: rect.left, y: rect.top, w: rect.width, h: rect.height,
             vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
             dragging: false, grabDX: 0, grabDY: 0,
             startClientX: 0, startClientY: 0, didDrag: false
           };
+          el.style.transform = 'translate(' + body.x + 'px,' + body.y + 'px)';
 
           function onMouseDown(e) {
-            card.dragging = true;
-            card.didDrag = false;
-            card.grabDX = e.clientX - card.x;
-            card.grabDY = e.clientY - card.y;
-            card.startClientX = e.clientX;
-            card.startClientY = e.clientY;
-            card.vx = 0;
-            card.vy = 0;
+            body.dragging = true;
+            body.didDrag = false;
+            body.grabDX = e.clientX - body.x;
+            body.grabDY = e.clientY - body.y;
+            body.startClientX = e.clientX;
+            body.startClientY = e.clientY;
+            body.vx = 0;
+            body.vy = 0;
             el.style.cursor = 'grabbing';
             e.preventDefault();
           }
 
           function onClickCapture(e) {
-            if (card.didDrag) {
+            if (body.didDrag) {
               e.preventDefault();
             }
           }
@@ -747,41 +846,40 @@
             el.removeEventListener('click', onClickCapture, true);
           });
 
-          return card;
+          return body;
         });
 
         function onDocMouseMove(e) {
-          spaceCards.forEach(function (card) {
-            if (!card.dragging) return;
-            var newX = e.clientX - card.grabDX;
-            var newY = e.clientY - card.grabDY;
-            card.vx = newX - card.x;
-            card.vy = newY - card.y;
-            card.x = newX;
-            card.y = newY;
-            card.el.style.left = card.x + 'px';
-            card.el.style.top = card.y + 'px';
-            if (!card.didDrag) {
-              var dist = Math.hypot(e.clientX - card.startClientX, e.clientY - card.startClientY);
-              if (dist > 5) card.didDrag = true;
+          spaceBodies.forEach(function (body) {
+            if (!body.dragging) return;
+            var newX = e.clientX - body.grabDX;
+            var newY = e.clientY - body.grabDY;
+            body.vx = newX - body.x;
+            body.vy = newY - body.y;
+            body.x = newX;
+            body.y = newY;
+            body.el.style.transform = 'translate(' + body.x + 'px,' + body.y + 'px)';
+            if (!body.didDrag) {
+              var dist = Math.hypot(e.clientX - body.startClientX, e.clientY - body.startClientY);
+              if (dist > 5) body.didDrag = true;
             }
           });
         }
 
         function onDocMouseUp() {
-          spaceCards.forEach(function (card) {
-            if (!card.dragging) return;
-            card.dragging = false;
-            card.el.style.cursor = 'grab';
+          spaceBodies.forEach(function (body) {
+            if (!body.dragging) return;
+            body.dragging = false;
+            body.el.style.cursor = 'grab';
             var maxSpeed = 40;
-            var speed = Math.hypot(card.vx, card.vy);
+            var speed = Math.hypot(body.vx, body.vy);
             if (speed > maxSpeed) {
-              card.vx = card.vx / speed * maxSpeed;
-              card.vy = card.vy / speed * maxSpeed;
+              body.vx = body.vx / speed * maxSpeed;
+              body.vy = body.vy / speed * maxSpeed;
             } else if (speed < 0.4) {
               var angle = Math.random() * Math.PI * 2;
-              card.vx = Math.cos(angle) * 1.5;
-              card.vy = Math.sin(angle) * 1.5;
+              body.vx = Math.cos(angle) * 1.2;
+              body.vy = Math.sin(angle) * 1.2;
             }
           });
         }
@@ -808,39 +906,15 @@
 
         function step() {
           var w = window.innerWidth, h = window.innerHeight;
-          spaceCards.forEach(function (c) {
-            if (c.dragging) return;
-            c.x += c.vx;
-            c.y += c.vy;
-            if (c.x <= 0) { c.x = 0; c.vx *= -1; }
-            if (c.x + c.w >= w) { c.x = w - c.w; c.vx *= -1; }
-            if (c.y <= 0) { c.y = 0; c.vy *= -1; }
-            if (c.y + c.h >= h) { c.y = h - c.h; c.vy *= -1; }
-          });
-
-          for (var i = 0; i < spaceCards.length; i++) {
-            for (var j = i + 1; j < spaceCards.length; j++) {
-              var a = spaceCards[i], b = spaceCards[j];
-              if (a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y) {
-                if (!a.dragging && !b.dragging) {
-                  var tvx = a.vx, tvy = a.vy;
-                  a.vx = b.vx; a.vy = b.vy;
-                  b.vx = tvx; b.vy = tvy;
-                  a.x -= a.vx; a.y -= a.vy;
-                  b.x -= b.vx; b.y -= b.vy;
-                } else if (a.dragging && !b.dragging) {
-                  b.vx = (b.x + b.w / 2 < a.x + a.w / 2 ? -1 : 1) * Math.max(Math.abs(b.vx), 2);
-                } else if (b.dragging && !a.dragging) {
-                  a.vx = (a.x + a.w / 2 < b.x + b.w / 2 ? -1 : 1) * Math.max(Math.abs(a.vx), 2);
-                }
-              }
-            }
-          }
-
-          spaceCards.forEach(function (c) {
-            if (c.dragging) return;
-            c.el.style.left = c.x + 'px';
-            c.el.style.top = c.y + 'px';
+          spaceBodies.forEach(function (b) {
+            if (b.dragging) return;
+            b.x += b.vx;
+            b.y += b.vy;
+            if (b.x <= 0) { b.x = 0; b.vx *= -1; }
+            if (b.x + b.w >= w) { b.x = w - b.w; b.vx *= -1; }
+            if (b.y <= 0) { b.y = 0; b.vy *= -1; }
+            if (b.y + b.h >= h) { b.y = h - b.h; b.vy *= -1; }
+            b.el.style.transform = 'translate(' + b.x + 'px,' + b.y + 'px)';
           });
           spaceAnimId = requestAnimationFrame(step);
         }
@@ -848,20 +922,22 @@
       }
 
       function exitSpace() {
+        if (!spaceModeActive) return;
         spaceModeActive = false;
         cancelAnimationFrame(spaceAnimId);
-        spaceCards.forEach(function (c) {
-          c.el.style.position = '';
-          c.el.style.left = '';
-          c.el.style.top = '';
-          c.el.style.width = '';
-          c.el.style.margin = '';
-          c.el.style.zIndex = '';
-          c.el.style.cursor = '';
+        spaceBodies.forEach(function (b) {
+          b.el.style.position = '';
+          b.el.style.left = '';
+          b.el.style.top = '';
+          b.el.style.width = '';
+          b.el.style.margin = '';
+          b.el.style.zIndex = '';
+          b.el.style.cursor = '';
+          b.el.style.transform = '';
         });
         spaceCleanup.forEach(function (fn) { fn(); });
         spaceCleanup = [];
-        spaceCards = [];
+        spaceBodies = [];
         spaceStars.forEach(function (s) { s.remove(); });
         spaceStars = [];
       }
