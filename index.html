@@ -374,12 +374,6 @@
     display: inline-block;
   }
 
-  /* Good luck: nothing on the page can receive the mouse (belt and
-     braces alongside the JS click blocker, which also covers keyboard
-     activation). No hover lifts either. */
-  body.good-luck-active .wrap {
-    pointer-events: none;
-  }
 
   .timeout-overlay {
     position: fixed;
@@ -718,8 +712,9 @@
 
       // "Good luck" -- every unit floats like it's in zero-g (velocity,
       // friction, soft wall bounce) but is shoved away by the cursor, so
-      // it keeps its distance and can't be caught. Nothing is clickable
-      // while it's on (see the click blocker below). Units drift back home
+      // it keeps its distance and is hard to catch. Everything is still
+      // technically clickable -- it just keeps running away from the
+      // cursor. Units drift back home
       // once the cursor is far enough away. Units stay in normal flow and
       // are only visually offset with transform, so the page layout
       // (panels, grid) doesn't collapse the way it does in Steamers in
@@ -769,23 +764,14 @@
 
         function onMove(e) { goodLuckMouse = { x: e.clientX, y: e.clientY }; }
         function onLeave() { goodLuckMouse = null; }
-        function blockClicks(e) {
-          if (e.target && e.target.closest && e.target.closest('.wrap')) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-          }
-        }
 
         document.addEventListener('mousemove', onMove);
         document.documentElement.addEventListener('mouseleave', onLeave);
         window.addEventListener('resize', measureGoodLuckHomes);
-        var blocked = ['click', 'dblclick', 'auxclick', 'mousedown', 'mouseup'];
-        blocked.forEach(function (type) { document.addEventListener(type, blockClicks, true); });
         goodLuckCleanup.push(function () {
           document.removeEventListener('mousemove', onMove);
           document.documentElement.removeEventListener('mouseleave', onLeave);
           window.removeEventListener('resize', measureGoodLuckHomes);
-          blocked.forEach(function (type) { document.removeEventListener(type, blockClicks, true); });
         });
 
         function step() {
