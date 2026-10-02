@@ -423,6 +423,245 @@
     from { opacity: 0.15; }
     to { opacity: 0.9; }
   }
+  /* ---- on3: every box grows arms and claps once ---- */
+  .clap-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 700;
+  }
+
+  .clap-rig {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .clap-arm {
+    position: absolute;
+    top: -5px;
+    width: 0;
+    height: 10px;
+    background: #F32000;
+    border-radius: 6px;
+    box-shadow: 0 0 0 2px #1A1A1A;
+  }
+
+  .clap-arm.left { transform-origin: 0 50%; animation: clap-left 2.4s both; }
+  .clap-arm.right { transform-origin: 100% 50%; animation: clap-right 2.4s both; }
+
+  .clap-hand {
+    position: absolute;
+    top: -4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: 2px solid #1A1A1A;
+  }
+
+  .clap-hand::after {
+    content: '';
+    position: absolute;
+    top: -7px;
+    left: 3px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: 2px solid #1A1A1A;
+  }
+
+  .clap-arm.left .clap-hand { right: -10px; }
+  .clap-arm.right .clap-hand { left: -10px; }
+
+  .clap-burst {
+    position: absolute;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    margin: -15px 0 0 -15px;
+    border: 3px solid #F32000;
+    border-radius: 50%;
+    opacity: 0;
+    animation: clap-burst 2.4s both;
+  }
+
+  @keyframes clap-left {
+    0%   { width: 0; transform: rotate(-90deg); }
+    22%  { width: var(--l); transform: rotate(-90deg); }
+    38%  { width: var(--l); transform: rotate(-104deg); animation-timing-function: cubic-bezier(.7, 0, .9, .5); }
+    50%  { width: var(--l); transform: rotate(0deg); }
+    64%  { width: var(--l); transform: rotate(0deg); }
+    82%  { width: var(--l); transform: rotate(-90deg); }
+    100% { width: 0; transform: rotate(-90deg); }
+  }
+
+  @keyframes clap-right {
+    0%   { width: 0; transform: rotate(90deg); }
+    22%  { width: var(--l); transform: rotate(90deg); }
+    38%  { width: var(--l); transform: rotate(104deg); animation-timing-function: cubic-bezier(.7, 0, .9, .5); }
+    50%  { width: var(--l); transform: rotate(0deg); }
+    64%  { width: var(--l); transform: rotate(0deg); }
+    82%  { width: var(--l); transform: rotate(90deg); }
+    100% { width: 0; transform: rotate(90deg); }
+  }
+
+  @keyframes clap-burst {
+    0%, 49% { opacity: 0; transform: scale(.2); }
+    50%     { opacity: 1; transform: scale(.5); }
+    72%     { opacity: 0; transform: scale(2); }
+    100%    { opacity: 0; transform: scale(2); }
+  }
+
+  /* ---- help: glitch, then everything lands as a tech zombie ---- */
+  html.help-glitch body {
+    animation: help-shake .18s steps(1) infinite;
+  }
+
+  @keyframes help-shake {
+    0%   { transform: translate(0, 0); filter: none; }
+    20%  { transform: translate(-7px, 2px) skewX(3deg); filter: hue-rotate(90deg) saturate(2.5); }
+    40%  { transform: translate(6px, -3px) skewX(-4deg); filter: invert(1); }
+    60%  { transform: translate(-3px, 5px); filter: hue-rotate(250deg) contrast(1.6); }
+    80%  { transform: translate(8px, 0) skewX(2deg); filter: contrast(2.2) saturate(0); }
+    100% { transform: translate(0, 0); filter: none; }
+  }
+
+  .glitch-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1500;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .glitch-strip {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    mix-blend-mode: difference;
+  }
+
+  body.zombie-on .trivia {
+    background: transparent;
+    border-color: transparent;
+  }
+
+  body.zombie-on .pe-unit {
+    position: relative;
+    z-index: 20;
+    transition: transform .9s cubic-bezier(.2, .9, .25, 1.12);
+  }
+
+  body.zombie-on .app-card,
+  body.zombie-on .trivia-option,
+  body.zombie-on .theme-toggle,
+  body.zombie-on .logo {
+    position: relative;
+    z-index: 40;
+    transition: transform .9s cubic-bezier(.2, .9, .25, 1.12);
+  }
+
+  body.zombie-on .theme-toggle { z-index: 50; }
+
+  .zombie-decor {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    z-index: 60;
+    pointer-events: none;
+  }
+
+  .zombie-decor > * {
+    position: absolute;
+    opacity: 0;
+    animation: zombie-pop .5s .9s forwards;
+  }
+
+  @keyframes zombie-pop {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(.3); }
+    to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+
+  .zombie-eye {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: 2px solid #1A1A1A;
+    color: #F32000;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .zombie-bolt {
+    border-radius: 50%;
+    background: #9AA0A6;
+    border: 2px solid #1A1A1A;
+  }
+
+  .zombie-bubble {
+    background: #FFFFFF;
+    color: #1A1A1A;
+    border: 2px solid #1A1A1A;
+    border-radius: 14px;
+    padding: 6px 12px;
+    font: 600 13px 'IBM Plex Mono', monospace;
+    white-space: nowrap;
+  }
+
+  /* ---- glesitu: zoom out to a galaxy of tech, fly back in ---- */
+  html.glesitu-on {
+    background: #000;
+    overflow: hidden;
+  }
+
+  html.glesitu-on body {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+    transform-origin: 0 0;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .glesitu-canvas {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .glesitu-hud {
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    z-index: 20;
+    max-width: 94vw;
+    text-align: center;
+    font: 600 11.5px 'IBM Plex Mono', monospace;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #D0D0D0;
+    background: rgba(0, 0, 0, .6);
+    border: 1px solid #444;
+    border-radius: 20px;
+    padding: 8px 16px;
+    pointer-events: none;
+    transition: opacity .8s;
+  }
 </style>
 </head>
 <body>
@@ -605,7 +844,10 @@
         { phrase: 'tilt', fn: toggleTilt },
         { phrase: 'good luck', fn: goodLuck },
         { phrase: 'timeout', fn: showTimeout },
-        { phrase: 'steamers in space', fn: toggleSpace }
+        { phrase: 'steamers in space', fn: toggleSpace },
+        { phrase: 'glesitu', fn: toggleGlesitu },
+        { phrase: 'help', fn: toggleZombie },
+        { phrase: 'on3', fn: doClap }
       ];
 
       document.addEventListener('keydown', function (e) {
@@ -614,6 +856,8 @@
           return;
         }
         if (e.key.length !== 1) return;
+        // While flying, WASD etc. are flight controls, not phrase input.
+        if (glActive) return;
         buffer = (buffer + e.key.toLowerCase()).slice(-maxLen);
         triggers.forEach(function (t) {
           if (buffer.indexOf(t.phrase) !== -1) {
@@ -627,6 +871,9 @@
         document.body.classList.remove('barrel-roll', 'tilted');
         stopGoodLuck();
         exitSpace();
+        stopZombie();
+        stopGlesitu();
+        stopClap();
         var overlay = document.getElementById('timeoutOverlay');
         if (overlay) overlay.remove();
       }
@@ -737,6 +984,8 @@
           stopGoodLuck();
         } else {
           exitSpace();
+          stopZombie();
+          stopGlesitu();
           startGoodLuck();
         }
       }
@@ -894,6 +1143,8 @@
           exitSpace();
         } else {
           stopGoodLuck();
+          stopZombie();
+          stopGlesitu();
           enterSpace();
         }
       }
@@ -1152,6 +1403,656 @@
         spaceBodies = [];
         spaceStars.forEach(function (s) { s.remove(); });
         spaceStars = [];
+      }
+
+      // ------------------------------------------------------------------
+      // on3 -- every box sprouts a pair of arms from its top edge, raises
+      // them, and claps once. All the rigs start on the same frame so they
+      // clap in sync. The rigs live in their own fixed overlay and are
+      // re-aligned to their boxes each frame, so the boxes themselves are
+      // never touched.
+      var clapLayer = null;
+      var clapRaf = null;
+      var clapTimer = null;
+
+      function stopClap() {
+        clearTimeout(clapTimer);
+        cancelAnimationFrame(clapRaf);
+        if (clapLayer) {
+          clapLayer.remove();
+          clapLayer = null;
+        }
+      }
+
+      function doClap() {
+        stopClap();
+        var boxes = Array.prototype.slice.call(
+          document.querySelectorAll('.app-card, .trivia, .trivia-option, .theme-toggle'));
+        var layer = document.createElement('div');
+        layer.className = 'clap-layer';
+        var rigs = [];
+
+        boxes.forEach(function (box) {
+          var r = box.getBoundingClientRect();
+          if (r.width < 4 || r.bottom < 0 || r.top > window.innerHeight) return;
+          // Arms are fixed-length and attached inset from the middle of the
+          // top edge so the hands meet at the center of any box width.
+          var L = Math.max(14, Math.min(60, r.width / 2 - 8));
+          var rig = document.createElement('div');
+          rig.className = 'clap-rig';
+          rig.style.setProperty('--l', L + 'px');
+          rig.innerHTML =
+            '<div class="clap-arm left" style="left:' + (r.width / 2 - L - 4) + 'px"><span class="clap-hand"></span></div>' +
+            '<div class="clap-arm right" style="left:' + (r.width / 2 + 4) + 'px"><span class="clap-hand"></span></div>' +
+            '<span class="clap-burst" style="left:' + (r.width / 2) + 'px"></span>';
+          layer.appendChild(rig);
+          rigs.push({ box: box, rig: rig });
+        });
+
+        document.documentElement.appendChild(layer);
+        clapLayer = layer;
+
+        function place() {
+          rigs.forEach(function (o) {
+            var r = o.box.getBoundingClientRect();
+            o.rig.style.transform = 'translate(' + r.left + 'px,' + r.top + 'px)';
+          });
+          clapRaf = requestAnimationFrame(place);
+        }
+        place();
+        clapTimer = setTimeout(stopClap, 2600);
+      }
+
+      // ------------------------------------------------------------------
+      // help -- the screen glitches out for a beat, then every piece of the
+      // page (cards, buttons, logo, each loose letter) lands as part of a
+      // jumbled zombie. Pieces are real elements only visually moved with
+      // transform, so they stay clickable; the interactive ones sit above
+      // the loose letters so a stray letter never blocks a click.
+      var zombieActive = false;
+      var zombieTimers = [];
+      var zombieUnits = [];
+      var zombieDecor = null;
+      var glitchEl = null;
+      var glitchInt = null;
+
+      function toggleZombie() {
+        if (zombieActive) {
+          stopZombie();
+        } else {
+          startZombie();
+        }
+      }
+
+      function startZombie() {
+        stopGoodLuck();
+        exitSpace();
+        stopGlesitu();
+        stopClap();
+        document.body.classList.remove('barrel-roll', 'tilted');
+        zombieActive = true;
+        window.scrollTo(0, 0);
+
+        document.documentElement.classList.add('help-glitch');
+        glitchEl = document.createElement('div');
+        glitchEl.className = 'glitch-overlay';
+        var strips = [];
+        for (var i = 0; i < 10; i++) {
+          var s = document.createElement('div');
+          s.className = 'glitch-strip';
+          glitchEl.appendChild(s);
+          strips.push(s);
+        }
+        document.documentElement.appendChild(glitchEl);
+
+        var stripColors = ['#F32000', '#00E5FF', '#FFFFFF', '#00FF66'];
+        function scramble() {
+          strips.forEach(function (st) {
+            st.style.top = Math.random() * 100 + '%';
+            st.style.height = (4 + Math.random() * 60) + 'px';
+            st.style.transform = 'translateX(' + (Math.random() * 80 - 40) + 'px)';
+            st.style.background = stripColors[Math.floor(Math.random() * stripColors.length)];
+            st.style.opacity = Math.random() < 0.35 ? 0 : 0.35 + Math.random() * 0.4;
+          });
+        }
+        scramble();
+        glitchInt = setInterval(scramble, 70);
+        zombieTimers.push(setTimeout(landZombie, 1300));
+      }
+
+      function landZombie() {
+        clearInterval(glitchInt);
+        glitchInt = null;
+        if (glitchEl) {
+          glitchEl.remove();
+          glitchEl = null;
+        }
+        document.documentElement.classList.remove('help-glitch');
+        if (!zombieActive) return;
+
+        document.body.classList.add('zombie-on');
+        var units = getScatterUnits();
+        zombieUnits = units;
+        units.forEach(function (el) { el.style.transform = ''; });
+        var rects = units.map(function (el) { return el.getBoundingClientRect(); });
+
+        var vw = window.innerWidth, vh = window.innerHeight;
+        // The figure is laid out in an 800x900 design space, scaled to fit.
+        var S = Math.max(0.45, Math.min(1.3, Math.min(vw / 800, vh / 900)));
+        function X(d) { return vw / 2 + (d - 400) * S; }
+        function Y(d) { return vh / 2 + (d - 450) * S; }
+        function rand(a, b) { return a + Math.random() * (b - a); }
+
+        var plan = new Map();
+        function put(el, dx, dy, rot, targetW) {
+          if (el) plan.set(el, { x: X(dx), y: Y(dy), rot: rot, tw: targetW * S });
+        }
+
+        var cards = document.querySelectorAll('.app-card');
+        var opts = document.querySelectorAll('.trivia-option');
+        put(document.querySelector('.logo'), 400, 105, 0, 130);        // head
+        put(cards[1], 400, 330, 0, 300);                               // torso
+        put(cards[0], 330, 775, -8, 120);                              // left foot
+        put(cards[2], 470, 775, 8, 120);                               // right foot
+        for (var c = 3; c < cards.length; c++) put(cards[c], rand(100, 700), rand(100, 800), rand(-30, 30), 100);
+        put(opts[0], 125, 275, -8, 250);                               // arms, drooping at the ends
+        put(opts[1], 675, 275, 8, 250);
+        put(opts[2], 352, 590, 85, 300);                               // legs
+        put(opts[3], 448, 590, 95, 300);
+        put(document.querySelector('.theme-toggle'), 440, 300, 0, 54); // the heart
+
+        // Loose letters become hair/brain over the head, tatters at the
+        // neck and waist, and a few stray flies.
+        units.forEach(function (el) {
+          if (!el.classList.contains('pe-unit')) return;
+          var z = Math.random(), tx, ty;
+          if (z < 0.34) {
+            var a = rand(0, Math.PI * 2), rr = Math.sqrt(Math.random());
+            tx = 400 + Math.cos(a) * rr * 100;
+            ty = 40 + Math.sin(a) * rr * 32;
+          } else if (z < 0.5) {
+            tx = rand(340, 460); ty = rand(162, 205);
+          } else if (z < 0.82) {
+            tx = rand(270, 530); ty = rand(446, 520);
+          } else {
+            tx = rand(60, 740); ty = rand(30, 840);
+          }
+          plan.set(el, { x: X(tx), y: Y(ty), rot: rand(-180, 180), tw: 0, scale: rand(0.9, 1.7) });
+        });
+
+        units.forEach(function (el, i) {
+          var p = plan.get(el);
+          if (!p) return;
+          var r = rects[i];
+          var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+          var k = p.tw ? p.tw / r.width : p.scale;
+          el.style.transitionDelay = rand(0, 0.35).toFixed(2) + 's';
+          el.style.transform = 'translate(' + (p.x - cx) + 'px,' + (p.y - cy) + 'px) rotate(' + p.rot + 'deg) scale(' + k + ')';
+        });
+
+        // Extra bits to make it look the part. All pointer-events:none.
+        zombieDecor = document.createElement('div');
+        zombieDecor.className = 'zombie-decor';
+        function dec(cls, dx, dy, w, h, html) {
+          var d = document.createElement('div');
+          d.className = cls;
+          d.style.left = X(dx) + 'px';
+          d.style.top = Y(dy) + 'px';
+          if (w) d.style.width = (w * S) + 'px';
+          if (h) d.style.height = (h * S) + 'px';
+          if (html) d.innerHTML = html;
+          zombieDecor.appendChild(d);
+          return d;
+        }
+        dec('zombie-eye', 372, 98, 30, 30, '&#10005;').style.fontSize = (17 * S) + 'px';
+        dec('zombie-eye', 434, 103, 22, 22, '&#10005;').style.fontSize = (13 * S) + 'px';
+        dec('', 402, 142, 72, 14,
+          '<svg viewBox="0 0 72 14" width="100%" height="100%" preserveAspectRatio="none">' +
+          '<polyline points="0,7 9,1 18,13 27,1 36,13 45,1 54,13 63,1 72,7" fill="none" ' +
+          'stroke="#7A0F0F" stroke-width="3" stroke-linejoin="round"/></svg>');
+        dec('zombie-bolt', 352, 190, 14, 14);
+        dec('zombie-bolt', 448, 190, 14, 14);
+        var bubble = dec('zombie-bubble', 600, 62, 0, 0, 'braaaiiins.exe');
+        bubble.style.fontSize = (13 * S) + 'px';
+        document.body.appendChild(zombieDecor);
+      }
+
+      function stopZombie() {
+        zombieTimers.forEach(clearTimeout);
+        zombieTimers = [];
+        clearInterval(glitchInt);
+        glitchInt = null;
+        if (glitchEl) {
+          glitchEl.remove();
+          glitchEl = null;
+        }
+        document.documentElement.classList.remove('help-glitch');
+        if (!zombieActive) return;
+        zombieActive = false;
+        document.body.classList.remove('zombie-on');
+        zombieUnits.forEach(function (el) {
+          el.style.transform = '';
+          el.style.transitionDelay = '';
+        });
+        zombieUnits = [];
+        if (zombieDecor) {
+          zombieDecor.remove();
+          zombieDecor = null;
+        }
+      }
+
+      // ------------------------------------------------------------------
+      // glesitu -- the camera pulls back from the page until it's a tiny
+      // window floating in a spiral galaxy made of tech gear, then you fly
+      // back in: W/S thrust, A/D turn, Up/Down pitch, Shift hyperdrive.
+      // The page itself is the real <body>, scaled and positioned by the
+      // 3D projection each frame (so it stays live), and a canvas behind it
+      // draws the galaxy. Get close and centered on HOME and it docks.
+      var glActive = false;
+      var gl = null;
+      var GX_R = 16000;
+      var GX_CENTER = { x: -7600, y: 0, z: 7600 };
+      var GX_GLYPHS = [
+        '💻', '📱', '🖥️', '⌨️', '🖱️', '💾',
+        '📡', '🔌', '🔋', '📟', '🎮', '💡',
+        '🤖', '🎧', '📷', '🖨️', '💿', '🛰️',
+        '{ }', '</>', '01', '@', 'USB', '404', '#!', 'Wi-Fi'
+      ];
+
+      function makeGlyphSprite(text) {
+        var c = document.createElement('canvas');
+        c.width = 64;
+        c.height = 64;
+        var x = c.getContext('2d');
+        x.textAlign = 'center';
+        x.textBaseline = 'middle';
+        if (text.charCodeAt(0) > 255) {
+          x.font = '40px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+          x.fillText(text, 32, 34);
+        } else {
+          var colors = ['#FFFFFF', '#F32000', '#9FC4FF', '#FFD27A'];
+          x.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+          x.shadowColor = x.fillStyle;
+          x.shadowBlur = 8;
+          x.font = 'bold ' + (text.length > 3 ? 17 : 24) + 'px "IBM Plex Mono", monospace';
+          x.fillText(text, 32, 33);
+        }
+        return c;
+      }
+
+      function makeGlowSprite() {
+        var c = document.createElement('canvas');
+        c.width = 256;
+        c.height = 256;
+        var x = c.getContext('2d');
+        var g = x.createRadialGradient(128, 128, 0, 128, 128, 128);
+        g.addColorStop(0, 'rgba(255,236,200,0.95)');
+        g.addColorStop(0.18, 'rgba(255,190,120,0.55)');
+        g.addColorStop(0.5, 'rgba(120,110,255,0.18)');
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+        x.fillStyle = g;
+        x.fillRect(0, 0, 256, 256);
+        return c;
+      }
+
+      function makeGalaxy(n, spriteCount) {
+        var P = [];
+        var dotColors = ['#FFFFFF', '#BCD4FF', '#FFD9A8', '#FF9A8A'];
+        for (var i = 0; i < n; i++) {
+          var x, y, z;
+          if (Math.random() < 0.2) {
+            var br = 2800 * Math.pow(Math.random(), 1.7), ba = Math.random() * Math.PI * 2;
+            x = GX_CENTER.x + Math.cos(ba) * br;
+            z = GX_CENTER.z + Math.sin(ba) * br;
+            y = (Math.random() - 0.5) * br * 0.8;
+          } else {
+            var arm = Math.floor(Math.random() * 3);
+            var r = 1500 + Math.pow(Math.random(), 0.75) * (GX_R - 1500);
+            var th = arm * (Math.PI * 2 / 3) + (r / GX_R) * 5.4 + (Math.random() - 0.5) * 0.6;
+            x = GX_CENTER.x + Math.cos(th) * r;
+            z = GX_CENTER.z + Math.sin(th) * r;
+            y = (Math.random() - 0.5) * 420 * (1.3 - r / GX_R);
+          }
+          var isGlyph = Math.random() < 0.55;
+          P.push({
+            x: x, y: y, z: z,
+            sprite: isGlyph ? Math.floor(Math.random() * spriteCount) : -1,
+            size: isGlyph ? 260 + Math.random() * 280 : 120 + Math.random() * 100,
+            color: dotColors[Math.floor(Math.random() * dotColors.length)]
+          });
+        }
+        return P;
+      }
+
+      function toggleGlesitu() {
+        if (glActive) {
+          stopGlesitu();
+        } else {
+          startGlesitu();
+        }
+      }
+
+      function startGlesitu() {
+        stopGoodLuck();
+        exitSpace();
+        stopZombie();
+        stopClap();
+        document.body.classList.remove('barrel-roll', 'tilted');
+        window.scrollTo(0, 0);
+        glActive = true;
+
+        var root = document.documentElement;
+        var canvas = document.createElement('canvas');
+        canvas.className = 'glesitu-canvas';
+        var hud = document.createElement('div');
+        hud.className = 'glesitu-hud';
+        hud.textContent = 'W / S thrust · A / D turn · ↑ / ↓ pitch · Shift hyperdrive · fly to HOME · Esc exits';
+        hud.style.opacity = '0';
+        root.classList.add('glesitu-on');
+        root.appendChild(canvas);
+        root.appendChild(hud);
+
+        var sprites = GX_GLYPHS.map(makeGlyphSprite);
+        gl = {
+          canvas: canvas, ctx: canvas.getContext('2d'), hud: hud,
+          sprites: sprites, glow: makeGlowSprite(),
+          particles: makeGalaxy(1500, sprites.length),
+          bg: [], keys: {}, cleanup: [],
+          cam: { x: 0, y: 0, z: 0, yaw: 0, pitch: 0 },
+          speed: 0, phase: 'zoom', t: 0, galaxyAlpha: 0,
+          W: 0, H: 0, f: 0, dpr: 1, raf: 0, last: performance.now(),
+          start: null, dock: null, hudFaded: false
+        };
+
+        for (var i = 0; i < 600; i++) {
+          var u = Math.random() * 2 - 1, a = Math.random() * Math.PI * 2, rr = Math.sqrt(1 - u * u);
+          gl.bg.push({ x: rr * Math.cos(a), y: u, z: rr * Math.sin(a), a: 0.25 + Math.random() * 0.6 });
+        }
+
+        function resize() {
+          gl.W = window.innerWidth;
+          gl.H = window.innerHeight;
+          gl.f = gl.H;
+          gl.dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+          canvas.width = Math.round(gl.W * gl.dpr);
+          canvas.height = Math.round(gl.H * gl.dpr);
+        }
+        resize();
+        gl.cam.z = -gl.f;
+        gl.start = { x: 0, y: 0, z: -gl.f, yaw: 0, pitch: 0 };
+
+        var KEYS = ['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Shift'];
+        function keyName(e) { return e.key.length === 1 ? e.key.toLowerCase() : e.key; }
+        function onKeyDown(e) {
+          var k = keyName(e);
+          if (KEYS.indexOf(k) !== -1) {
+            gl.keys[k] = true;
+            if (k !== 'Shift') e.preventDefault();
+          }
+        }
+        function onKeyUp(e) { gl.keys[keyName(e)] = false; }
+        function onBlur() { gl.keys = {}; }
+        document.addEventListener('keydown', onKeyDown);
+        document.addEventListener('keyup', onKeyUp);
+        window.addEventListener('blur', onBlur);
+        window.addEventListener('resize', resize);
+        gl.cleanup.push(function () {
+          document.removeEventListener('keydown', onKeyDown);
+          document.removeEventListener('keyup', onKeyUp);
+          window.removeEventListener('blur', onBlur);
+          window.removeEventListener('resize', resize);
+        });
+
+        var endPose = { x: 0, y: 22000, z: -28000, yaw: -0.119, pitch: -0.6 };
+
+        function lerp(a, b, t) { return a + (b - a) * t; }
+        function ease(u) { return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; }
+        function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+        // Page (the world origin) in camera space.
+        function pageInCam() {
+          var cam = gl.cam;
+          var dx = -cam.x, dy = -cam.y, dz = -cam.z;
+          var cyw = Math.cos(cam.yaw), syw = Math.sin(cam.yaw);
+          var cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
+          var z1 = dx * syw + dz * cyw;
+          return { x: dx * cyw - dz * syw, y: dy * cp - z1 * sp, z: dy * sp + z1 * cp };
+        }
+
+        function update(dt) {
+          var cam = gl.cam;
+          if (gl.phase === 'zoom') {
+            var u = Math.min(1, gl.t / 3.4), e = ease(u);
+            cam.x = lerp(gl.start.x, endPose.x, e);
+            cam.y = lerp(gl.start.y, endPose.y, e);
+            cam.z = lerp(gl.start.z, endPose.z, e);
+            cam.yaw = lerp(gl.start.yaw, endPose.yaw, e);
+            cam.pitch = lerp(gl.start.pitch, endPose.pitch, e);
+            var ga = clamp((u - 0.1) / 0.55, 0, 1);
+            gl.galaxyAlpha = ga * ga * (3 - 2 * ga);
+            if (u >= 1) {
+              gl.phase = 'fly';
+              hud.style.opacity = '1';
+              gl.flyT = 0;
+            }
+          } else if (gl.phase === 'fly') {
+            var keys = gl.keys;
+            var turn = ((keys.d || keys.ArrowRight) ? 1 : 0) - ((keys.a || keys.ArrowLeft) ? 1 : 0);
+            var tilt = (keys.ArrowUp ? 1 : 0) - (keys.ArrowDown ? 1 : 0);
+            var thrust = (keys.w ? 1 : 0) - (keys.s ? 1 : 0);
+            var boost = keys.Shift ? 4 : 1;
+            cam.yaw += turn * 1.15 * dt;
+            cam.pitch = clamp(cam.pitch + tilt * 0.9 * dt, -1.45, 1.45);
+            gl.speed += thrust * 5200 * boost * dt;
+            gl.speed *= Math.exp(-1.1 * dt);
+
+            // Ease off when closing in on the page so you don't overshoot.
+            var dist = Math.sqrt(cam.x * cam.x + cam.y * cam.y + cam.z * cam.z);
+            if (gl.speed > 0) gl.speed = Math.min(gl.speed, Math.max(700, dist * 1.6));
+
+            cam.x += Math.cos(cam.pitch) * Math.sin(cam.yaw) * gl.speed * dt;
+            cam.y += Math.sin(cam.pitch) * gl.speed * dt;
+            cam.z += Math.cos(cam.pitch) * Math.cos(cam.yaw) * gl.speed * dt;
+
+            gl.flyT += dt;
+            if (!gl.hudFaded && gl.flyT > 14) {
+              gl.hudFaded = true;
+              hud.style.opacity = '0.4';
+            }
+
+            var pc = pageInCam();
+            if (pc.z > 0) {
+              var s = gl.f / pc.z;
+              var sx = gl.W / 2 + pc.x * s, sy = gl.H / 2 - pc.y * s;
+              var centered = Math.abs(sx - gl.W / 2) < gl.W * 0.25 && Math.abs(sy - gl.H / 2) < gl.H * 0.25;
+              if ((s > 0.5 && centered) || pc.z < gl.f * 0.6) {
+                gl.phase = 'dock';
+                gl.speed = 0;
+                gl.dock = {
+                  t: 0,
+                  from: {
+                    x: cam.x, y: cam.y, z: cam.z,
+                    yaw: Math.atan2(Math.sin(cam.yaw), Math.cos(cam.yaw)), pitch: cam.pitch
+                  }
+                };
+                hud.style.opacity = '0';
+              }
+            }
+          } else if (gl.phase === 'dock') {
+            gl.dock.t += dt;
+            var du = Math.min(1, gl.dock.t / 0.9), de = ease(du), f0 = gl.dock.from;
+            cam.x = lerp(f0.x, 0, de);
+            cam.y = lerp(f0.y, 0, de);
+            cam.z = lerp(f0.z, -gl.f, de);
+            cam.yaw = lerp(f0.yaw, 0, de);
+            cam.pitch = lerp(f0.pitch, 0, de);
+            if (du >= 1) stopGlesitu();
+          }
+        }
+
+        function render() {
+          if (!glActive) return;
+          var ctx = gl.ctx, W = gl.W, H = gl.H, f = gl.f, cam = gl.cam;
+          ctx.setTransform(gl.dpr, 0, 0, gl.dpr, 0, 0);
+          ctx.clearRect(0, 0, W, H);
+
+          var cyw = Math.cos(cam.yaw), syw = Math.sin(cam.yaw);
+          var cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
+
+          // Distant stars: direction only, so they swing as you turn.
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.fillStyle = '#FFFFFF';
+          for (var b = 0; b < gl.bg.length; b++) {
+            var bs = gl.bg[b];
+            var bz1 = bs.x * syw + bs.z * cyw;
+            var bz2 = bs.y * sp + bz1 * cp;
+            if (bz2 < 0.05) continue;
+            var bx1 = bs.x * cyw - bs.z * syw;
+            var by2 = bs.y * cp - bz1 * sp;
+            ctx.globalAlpha = bs.a * (gl.galaxyAlpha * 0.8 + 0.2);
+            ctx.fillRect(W / 2 + bx1 / bz2 * f, H / 2 - by2 / bz2 * f, 1.4, 1.4);
+          }
+
+          // Galaxy core glow.
+          var gdx = GX_CENTER.x - cam.x, gdy = GX_CENTER.y - cam.y, gdz = GX_CENTER.z - cam.z;
+          var gz1 = gdx * syw + gdz * cyw;
+          var gz2 = gdy * sp + gz1 * cp;
+          if (gz2 > 200) {
+            var gsc = f / gz2;
+            var gsize = 13000 * gsc;
+            ctx.globalAlpha = gl.galaxyAlpha * 0.85;
+            ctx.drawImage(gl.glow,
+              W / 2 + (gdx * cyw - gdz * syw) * gsc - gsize / 2,
+              H / 2 - (gdy * cp - gz1 * sp) * gsc - gsize / 2, gsize, gsize);
+          }
+
+          // Tech-gear stars.
+          var P = gl.particles;
+          for (var i = 0; i < P.length; i++) {
+            var p = P[i];
+            var dx = p.x - cam.x, dy = p.y - cam.y, dz = p.z - cam.z;
+            var z1 = dx * syw + dz * cyw;
+            var z2 = dy * sp + z1 * cp;
+            if (z2 < 60) continue;
+            var sc = f / z2;
+            var size = Math.min(320, p.size * sc);
+            var px = W / 2 + (dx * cyw - dz * syw) * sc;
+            var py = H / 2 - (dy * cp - z1 * sp) * sc;
+            if (px < -size || px > W + size || py < -size || py > H + size) continue;
+            ctx.globalAlpha = gl.galaxyAlpha * Math.max(0.18, Math.min(1, 1.6 - z2 / 52000));
+            if (p.sprite < 0 || size < 2.2) {
+              var ds = Math.max(1, size * 0.5);
+              ctx.fillStyle = p.color;
+              ctx.fillRect(px - ds / 2, py - ds / 2, ds, ds);
+            } else {
+              ctx.drawImage(gl.sprites[p.sprite], px - size / 2, py - size / 2, size, size);
+            }
+          }
+
+          // Hyperdrive streaks.
+          var boostAmt = clamp((Math.abs(gl.speed) - 6500) / 9000, 0, 1);
+          if (boostAmt > 0) {
+            ctx.globalAlpha = 0.2 + 0.5 * boostAmt;
+            ctx.strokeStyle = '#B4C8FF';
+            ctx.lineWidth = 1.3;
+            ctx.beginPath();
+            for (var k = 0; k < 90; k++) {
+              var ang = Math.random() * Math.PI * 2;
+              var r0 = (0.05 + Math.random() * 0.55) * Math.min(W, H);
+              var r1 = r0 + 40 + 280 * boostAmt * Math.random();
+              ctx.moveTo(W / 2 + Math.cos(ang) * r0, H / 2 + Math.sin(ang) * r0);
+              ctx.lineTo(W / 2 + Math.cos(ang) * r1, H / 2 + Math.sin(ang) * r1);
+            }
+            ctx.stroke();
+          }
+
+          // The page itself: position/scale the real <body> from the projection.
+          var pc = pageInCam();
+          var bodyEl = document.body;
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.globalAlpha = 1;
+          if (pc.z > 5) {
+            var s = Math.min(3, f / pc.z);
+            var cx = W / 2 + pc.x * (f / pc.z), cy = H / 2 - pc.y * (f / pc.z);
+            bodyEl.style.visibility = s < 0.0008 ? 'hidden' : 'visible';
+            bodyEl.style.transform = 'translate(' + (cx - W * s / 2) + 'px,' + (cy - H * s / 2) + 'px) scale(' + s + ')';
+
+            if (gl.phase === 'fly' || gl.phase === 'zoom') {
+              ctx.font = '700 12px "IBM Plex Mono", monospace';
+              ctx.textAlign = 'center';
+              ctx.fillStyle = '#F32000';
+              ctx.strokeStyle = '#F32000';
+              var inView = cx > 30 && cx < W - 30 && cy > 30 && cy < H - 30;
+              if (inView && s < 0.35) {
+                var rad = Math.max(18, Math.hypot(W * s, H * s) / 2 + 8) * (1 + 0.12 * Math.sin(gl.t * 4));
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.fillText('HOME', cx, cy - rad - 8);
+                ctx.fillStyle = '#9FC4FF';
+                var d1 = Math.sqrt(cam.x * cam.x + cam.y * cam.y + cam.z * cam.z);
+                ctx.fillText((d1 / 1000).toFixed(1) + ' ly', cx, cy + rad + 18);
+              } else if (!inView && gl.phase === 'fly') {
+                drawHomeArrow(ctx, pc, W, H);
+              }
+            }
+          } else {
+            bodyEl.style.visibility = 'hidden';
+            if (gl.phase === 'fly') drawHomeArrow(ctx, pc, W, H);
+          }
+        }
+
+        function drawHomeArrow(ctx, pc, W, H) {
+          var ang = Math.atan2(-pc.y, pc.x);
+          if (Math.abs(pc.x) < 1 && Math.abs(pc.y) < 1) ang = Math.PI / 2;
+          var rx = W * 0.42, ry = H * 0.4;
+          var ax = W / 2 + Math.cos(ang) * rx, ay = H / 2 + Math.sin(ang) * ry;
+          ctx.save();
+          ctx.translate(ax, ay);
+          ctx.rotate(ang);
+          ctx.fillStyle = '#F32000';
+          ctx.beginPath();
+          ctx.moveTo(16, 0);
+          ctx.lineTo(-10, -11);
+          ctx.lineTo(-10, 11);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+          ctx.font = '700 12px "IBM Plex Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#F32000';
+          ctx.fillText('HOME', ax - Math.cos(ang) * 30, ay - Math.sin(ang) * 26 + 4);
+        }
+
+        function frame(now) {
+          gl.raf = requestAnimationFrame(frame);
+          var dt = (now - gl.last) / 1000;
+          gl.last = now;
+          if (!(dt > 0)) dt = 0.016;
+          dt = Math.min(0.05, dt);
+          gl.t += dt;
+          update(dt);
+          render();
+        }
+
+        update(0.016);
+        render();
+        gl.raf = requestAnimationFrame(frame);
+      }
+
+      function stopGlesitu() {
+        if (!glActive) return;
+        glActive = false;
+        cancelAnimationFrame(gl.raf);
+        gl.cleanup.forEach(function (fn) { fn(); });
+        gl.canvas.remove();
+        gl.hud.remove();
+        gl = null;
+        document.documentElement.classList.remove('glesitu-on');
+        document.body.style.transform = '';
+        document.body.style.visibility = '';
+        window.scrollTo(0, 0);
       }
     })();
 
