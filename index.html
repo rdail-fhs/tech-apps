@@ -374,12 +374,11 @@
     display: inline-block;
   }
 
-  body.good-luck-active .pe-unit,
-  body.good-luck-active .app-card,
-  body.good-luck-active .trivia-option,
-  body.good-luck-active .theme-toggle,
-  body.good-luck-active .logo {
-    transition: transform 0.12s ease-out;
+  /* Good luck: nothing on the page can receive the mouse (belt and
+     braces alongside the JS click blocker, which also covers keyboard
+     activation). No hover lifts either. */
+  body.good-luck-active .wrap {
+    pointer-events: none;
   }
 
   .timeout-overlay {
@@ -717,57 +716,163 @@
         return units;
       }
 
-      // "Good luck" -- every unit flees the cursor and returns home the
-      // moment the cursor is far enough away. No timer: only re-typing the
-      // phrase or hitting Esc turns it off.
+      // "Good luck" -- every unit floats like it's in zero-g (velocity,
+      // friction, soft wall bounce) but is shoved away by the cursor, so
+      // it keeps its distance and can't be caught. Nothing is clickable
+      // while it's on (see the click blocker below). Units drift back home
+      // once the cursor is far enough away. Units stay in normal flow and
+      // are only visually offset with transform, so the page layout
+      // (panels, grid) doesn't collapse the way it does in Steamers in
+      // Space. No timer: re-typing the phrase or hitting Esc turns it off.
       var goodLuckActive = false;
-      var goodLuckUnits = [];
-      var goodLuckMoveHandler = null;
+      var goodLuckBodies = [];
+      var goodLuckRaf = null;
+      var goodLuckMouse = null;
+      var goodLuckCleanup = [];
+
+      var GL_RADIUS = 230;
+      var GL_REPEL = 3.4;
+      var GL_SPRING = 0.012;
+      var GL_FRICTION = 0.9;
+      var GL_MAX_SPEED = 42;
+      var GL_WALL_BOUNCE = 0.4;
 
       function goodLuck() {
         if (goodLuckActive) {
           stopGoodLuck();
         } else {
+          exitSpace();
           startGoodLuck();
         }
       }
 
+      function measureGoodLuckHomes() {
+        goodLuckBodies.forEach(function (b) { b.el.style.transform = ''; });
+        var rects = goodLuckBodies.map(function (b) { return b.el.getBoundingClientRect(); });
+        goodLuckBodies.forEach(function (b, i) {
+          var r = rects[i];
+          b.pageX = r.left + window.scrollX;
+          b.pageY = r.top + window.scrollY;
+          b.w = r.width;
+          b.h = r.height;
+          b.dx = 0; b.dy = 0; b.vx = 0; b.vy = 0;
+          b.resting = true;
+        });
+      }
+
       function startGoodLuck() {
         goodLuckActive = true;
+        goodLuckMouse = null;
         document.body.classList.add('good-luck-active');
-        goodLuckUnits = getScatterUnits();
+        goodLuckBodies = getScatterUnits().map(function (el) { return { el: el }; });
+        measureGoodLuckHomes();
 
-        goodLuckUnits.forEach(function (el) { el.style.transform = ''; });
-        goodLuckUnits.forEach(function (el) {
-          var r = el.getBoundingClientRect();
-          el.__homeX = r.left + r.width / 2;
-          el.__homeY = r.top + r.height / 2;
+        function onMove(e) { goodLuckMouse = { x: e.clientX, y: e.clientY }; }
+        function onLeave() { goodLuckMouse = null; }
+        function blockClicks(e) {
+          if (e.target && e.target.closest && e.target.closest('.wrap')) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+          }
+        }
+
+        document.addEventListener('mousemove', onMove);
+        document.documentElement.addEventListener('mouseleave', onLeave);
+        window.addEventListener('resize', measureGoodLuckHomes);
+        var blocked = ['click', 'dblclick', 'auxclick', 'mousedown', 'mouseup'];
+        blocked.forEach(function (type) { document.addEventListener(type, blockClicks, true); });
+        goodLuckCleanup.push(function () {
+          document.removeEventListener('mousemove', onMove);
+          document.documentElement.removeEventListener('mouseleave', onLeave);
+          window.removeEventListener('resize', measureGoodLuckHomes);
+          blocked.forEach(function (type) { document.removeEventListener(type, blockClicks, true); });
         });
 
-        goodLuckMoveHandler = function (e) {
-          goodLuckUnits.forEach(function (el) {
-            var dx = el.__homeX - e.clientX;
-            var dy = el.__homeY - e.clientY;
-            var dist = Math.sqrt(dx * dx + dy * dy);
-            var radius = 150;
-            if (dist < radius && dist > 0.01) {
-              var strength = (radius - dist) / radius;
-              var push = 120 * strength;
-              el.style.transform = 'translate(' + (dx / dist * push) + 'px,' + (dy / dist * push) + 'px)';
-            } else {
-              el.style.transform = '';
+        function step() {
+          var vw = window.innerWidth, vh = window.innerHeight;
+          var sx = window.scrollX, sy = window.scrollY;
+          var m = goodLuckMouse;
+
+          goodLuckBodies.forEach(function (b) {
+            var hx = b.pageX - sx, hy = b.pageY - sy;
+            var x = hx + b.dx, y = hy + b.dy;
+
+            // Distance from the cursor to the nearest point of this unit's
+            // box (not its center), so big cards back off when the cursor
+            // is merely near an edge.
+            var d = Infinity;
+            var ax = 0, ay = 0;
+            if (m) {
+              var nx = Math.max(x, Math.min(m.x, x + b.w));
+              var ny = Math.max(y, Math.min(m.y, y + b.h));
+              d = Math.hypot(m.x - nx, m.y - ny);
+              if (d < GL_RADIUS) {
+                var cx = x + b.w / 2 - m.x, cy = y + b.h / 2 - m.y;
+                var cl = Math.hypot(cx, cy);
+                if (cl < 0.01) {
+                  var ang = Math.random() * Math.PI * 2;
+                  cx = Math.cos(ang); cy = Math.sin(ang); cl = 1;
+                }
+                var f = GL_REPEL * (GL_RADIUS - d) / GL_RADIUS;
+                ax += cx / cl * f;
+                ay += cy / cl * f;
+              }
             }
+
+            if (b.resting && d >= GL_RADIUS) return;
+
+            // Spring home, fading in only once the cursor is well clear --
+            // inside the repel radius the unit isn't pulled back toward the
+            // cursor, so it hovers at the edge of that radius instead.
+            var pull = m ? Math.max(0, Math.min(1, (d - 0.85 * GL_RADIUS) / (0.3 * GL_RADIUS))) : 1;
+            ax -= b.dx * GL_SPRING * pull;
+            ay -= b.dy * GL_SPRING * pull;
+
+            b.vx = (b.vx + ax) * GL_FRICTION;
+            b.vy = (b.vy + ay) * GL_FRICTION;
+            var speed = Math.hypot(b.vx, b.vy);
+            if (speed > GL_MAX_SPEED) {
+              b.vx = b.vx / speed * GL_MAX_SPEED;
+              b.vy = b.vy / speed * GL_MAX_SPEED;
+            }
+            b.dx += b.vx;
+            b.dy += b.vy;
+
+            // Keep it inside the viewport (only on axes where its home is
+            // already on screen, so things below the fold aren't yanked up).
+            var minDx = Math.min(0, -hx), maxDx = Math.max(0, vw - hx - b.w);
+            var minDy = Math.min(0, -hy), maxDy = Math.max(0, vh - hy - b.h);
+            if (b.dx < minDx) { b.dx = minDx; b.vx *= -GL_WALL_BOUNCE; }
+            else if (b.dx > maxDx) { b.dx = maxDx; b.vx *= -GL_WALL_BOUNCE; }
+            if (b.dy < minDy) { b.dy = minDy; b.vy *= -GL_WALL_BOUNCE; }
+            else if (b.dy > maxDy) { b.dy = maxDy; b.vy *= -GL_WALL_BOUNCE; }
+
+            if (d >= GL_RADIUS && Math.abs(b.vx) < 0.03 && Math.abs(b.vy) < 0.03 &&
+                Math.abs(b.dx) < 0.3 && Math.abs(b.dy) < 0.3) {
+              b.dx = 0; b.dy = 0; b.vx = 0; b.vy = 0;
+              b.el.style.transform = '';
+              b.resting = true;
+              return;
+            }
+
+            b.resting = false;
+            b.el.style.transform = 'translate(' + b.dx + 'px,' + b.dy + 'px)';
           });
-        };
-        document.addEventListener('mousemove', goodLuckMoveHandler);
+
+          goodLuckRaf = requestAnimationFrame(step);
+        }
+        goodLuckRaf = requestAnimationFrame(step);
       }
 
       function stopGoodLuck() {
         if (!goodLuckActive) return;
         goodLuckActive = false;
-        document.removeEventListener('mousemove', goodLuckMoveHandler);
-        goodLuckMoveHandler = null;
-        goodLuckUnits.forEach(function (el) { el.style.transform = ''; });
+        cancelAnimationFrame(goodLuckRaf);
+        goodLuckCleanup.forEach(function (fn) { fn(); });
+        goodLuckCleanup = [];
+        goodLuckBodies.forEach(function (b) { b.el.style.transform = ''; });
+        goodLuckBodies = [];
+        goodLuckMouse = null;
         document.body.classList.remove('good-luck-active');
       }
 
@@ -802,6 +907,7 @@
         if (spaceModeActive) {
           exitSpace();
         } else {
+          stopGoodLuck();
           enterSpace();
         }
       }
