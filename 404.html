@@ -3,6 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  // GitHub Pages paths are case-sensitive, so /Steamy, /Tickets, /Inventory
+  // etc. land here. If the lowercase version differs, go there instead. A
+  // truly unknown lowercase path stays here (no redirect loop).
+  (function () {
+    var p = location.pathname, lower = p.toLowerCase();
+    if (p !== lower) location.replace(lower + location.search + location.hash);
+  })();
+</script>
 <title>Page not found · Tech Apps</title>
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
