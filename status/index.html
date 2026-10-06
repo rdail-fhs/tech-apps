@@ -16,6 +16,7 @@
         document.documentElement.setAttribute('data-theme', stored);
       }
     } catch (e) {}
+    if (/[?&]display=1\b/.test(location.search)) document.documentElement.classList.add('display');
   })();
 </script>
 <style>
@@ -207,6 +208,26 @@
   .btn:disabled { opacity: 0.5; cursor: wait; filter: none; transform: none; box-shadow: none; }
 
   #errorState { color: var(--red); font-weight: 700; font-size: 13.5px; margin-top: 16px; }
+
+  /* ?display=1 -- compact layout for the wall display: no chrome, small tiles,
+     everything on one screen with no scrolling (see fitDisplay() below). */
+  html.display, html.display body { overflow: hidden; height: 100%; }
+  html.display .bar, html.display h2, html.display #banner, html.display #refreshBtn { display: none; }
+  html.display main { max-width: none; margin: 0; padding: 14px 16px; }
+  html.display .header-row { margin-bottom: 10px; }
+  html.display h1 { font-size: 26px; }
+  html.display #serviceList { grid-template-columns: repeat(auto-fill, minmax(205px, 1fr)); gap: 10px; }
+  html.display .service-card:hover { transform: none; box-shadow: var(--shadow-sm); border-color: var(--border); }
+  html.display .tile-top { padding: 6px 12px; font-size: 11px; }
+  html.display .tile-body { padding: 13px 12px 11px; }
+  html.display .logo { width: 38px; height: 38px; padding: 4px; }
+  html.display .service-name { font-size: 17px; }
+  html.display .service-about { display: none; }
+  html.display .service-desc { font-size: 13px; margin-top: 9px; line-height: 1.35; }
+  html.display .incident { margin-top: 7px; padding: 6px 8px; font-size: 12.5px; }
+  html.display .card-meta-wrap { margin-top: 8px; }
+  html.display .card-meta { padding-top: 8px; font-size: 11px; }
+  html.display .card-meta span:last-child { display: none; }
 </style>
 </head>
 <body>
@@ -418,7 +439,25 @@
         document.getElementById('updated').textContent = liveAt
           ? 'Live check ' + liveAt.toLocaleTimeString() + ' · refreshes every minute'
           : 'Showing saved data from ' + ago(committedAt) + ' · checking live…';
+
+        fitDisplay();
       }
+
+      // Display mode only: if the tiles (e.g. a service with several incidents) would
+      // run past the bottom, shrink the whole page just enough that nothing scrolls.
+      function fitDisplay() {
+        if (!document.documentElement.classList.contains('display')) return;
+        var m = document.querySelector('main');
+        m.style.zoom = 1;
+        var z = 1;
+        for (var i = 0; i < 5; i++) {
+          var h = m.getBoundingClientRect().height;
+          if (h <= window.innerHeight - 2) break;
+          z *= (window.innerHeight - 4) / h;
+          m.style.zoom = z;
+        }
+      }
+      window.addEventListener('resize', fitDisplay);
 
       // ---- startup: show saved data instantly, then check live ----
       Promise.all([

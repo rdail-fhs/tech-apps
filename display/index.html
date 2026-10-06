@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tech Display</title>
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+<style>
+  /* Wall display: tickets on top, service status underneath, no chrome.
+     Built for a vertical monitor but works at any size.
+       ?split=52    percent of the height given to tickets (default 52)
+       ?refresh=300 seconds between reloads of the tickets panel (default 300)
+       ?theme=light use the light theme for the status panel (default dark) */
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; background: #101010; overflow: hidden; }
+
+  .wall {
+    display: grid;
+    grid-template-rows: var(--tickets, 52fr) var(--status, 48fr);
+    height: 100vh;
+  }
+
+  .panel { min-height: 0; position: relative; }
+  .panel + .panel { border-top: 3px solid #F32000; }
+
+  iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #101010; }
+</style>
+</head>
+<body>
+  <div class="wall" id="wall">
+    <section class="panel">
+      <iframe id="tickets" title="Tech tickets"
+        src="https://script.google.com/a/macros/riverbendschools.net/s/AKfycbw_xQXMqAKUUzhmAzfXrOjW2FbknbFkMlZjGyb9qk_6yuC_GK9qjYWnUh7SExdO-w_vPA/exec"></iframe>
+    </section>
+    <section class="panel">
+      <iframe id="status" title="Service status" src="about:blank"></iframe>
+    </section>
+  </div>
+
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search);
+
+      var split = parseFloat(q.get('split'));
+      if (!(split >= 20 && split <= 80)) split = 52;
+      document.getElementById('wall').style.setProperty('--tickets', split + 'fr');
+      document.getElementById('wall').style.setProperty('--status', (100 - split) + 'fr');
+
+      // The status panel shares this site's saved theme. Default this screen to dark
+      // unless someone chose otherwise (or passes ?theme=light).
+      try {
+        var theme = q.get('theme');
+        if (theme === 'light' || theme === 'dark') localStorage.setItem('theme', theme);
+        else if (!localStorage.getItem('theme')) localStorage.setItem('theme', 'dark');
+      } catch (e) {}
+      document.getElementById('status').src = '../status/?display=1';
+
+      // The tickets app doesn't update itself, so reload it on a timer.
+      var every = parseInt(q.get('refresh'), 10);
+      if (!(every >= 30)) every = 300;
+      var tickets = document.getElementById('tickets');
+      setInterval(function () { tickets.src = tickets.src; }, every * 1000);
+    })();
+  </script>
+</body>
+</html>
