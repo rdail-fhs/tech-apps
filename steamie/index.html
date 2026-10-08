@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Steamie · Tech Apps</title>
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<script>
+  (function () {
+    try {
+      var stored = localStorage.getItem('theme');
+      if (stored === 'light' || stored === 'dark') {
+        document.documentElement.setAttribute('data-theme', stored);
+      }
+    } catch (e) {}
+  })();
+</script>
+<style>
+  :root {
+    --ink: #1A1A1A;
+    --ink-soft: #6E6E6E;
+    --paper: #F2F2F2;
+    --card-border: #E0E0E0;
+    --accent: #F32000;
+    --accent-ink: #FFFFFF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #EDEDED;
+      --ink-soft: #A0A0A0;
+      --paper: #121212;
+      --card-border: #333333;
+      --accent: #F32000;
+      --accent-ink: #1A1A1A;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #EDEDED;
+    --ink-soft: #A0A0A0;
+    --paper: #121212;
+    --card-border: #333333;
+    --accent: #F32000;
+    --accent-ink: #1A1A1A;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--paper);
+    font-family: 'Public Sans', system-ui, sans-serif;
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    height: 48px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--card-border);
+    color: var(--ink);
+  }
+
+  .bar a.back {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .bar a.back:hover { color: var(--accent); }
+
+  .bar .title {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    margin-right: auto;
+    padding-left: 12px;
+  }
+
+  .theme-toggle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--card-border);
+    background: transparent;
+    color: var(--ink);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .theme-toggle:hover { border-color: var(--accent); }
+
+  iframe {
+    display: block;
+    width: 100%;
+    height: calc(100vh - 48px);
+    border: none;
+  }
+
+  #directLink {
+    position: fixed;
+    bottom: 14px;
+    right: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    background: var(--accent);
+    color: var(--accent-ink);
+    padding: 8px 14px;
+    border-radius: 20px;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+  }
+
+  #directLink:hover { filter: brightness(1.08); }
+</style>
+</head>
+<body>
+  <div class="bar">
+    <a class="back" href="../">&larr; All apps</a>
+    <span class="title">Steamie</span>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">&#9789;</button>
+  </div>
+
+  <!-- Cross-origin iframes fire "load" even when they show a blocked/
+       sign-in error page, not just on real success -- so this can't
+       reliably detect success/failure and hide itself. It just stays a
+       small, always-present way out if the frame above it isn't working. -->
+  <iframe
+    src="https://script.google.com/a/macros/riverbendschools.net/s/AKfycby4pHvUyXcj66p-Uk6mYtfA-tQnsihcjX57cg4IJeb8R5PJ5rFv_KwChbOH3EFxjD3hLg/exec"
+    title="Steamie">
+  </iframe>
+  <a id="directLink"
+     href="https://script.google.com/a/macros/riverbendschools.net/s/AKfycby4pHvUyXcj66p-Uk6mYtfA-tQnsihcjX57cg4IJeb8R5PJ5rFv_KwChbOH3EFxjD3hLg/exec"
+     target="_blank" rel="noopener">
+    Not loading? Open directly &rarr;
+  </a>
+
+  <script>
+    (function () {
+      var btn = document.getElementById('themeToggle');
+      function effectiveTheme() {
+        var stored = null;
+        try { stored = localStorage.getItem('theme'); } catch (e) {}
+        if (stored === 'light' || stored === 'dark') return stored;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      function updateIcon() {
+        btn.innerHTML = effectiveTheme() === 'dark' ? '&#9728;' : '&#9789;';
+      }
+      btn.addEventListener('click', function () {
+        var next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+        try { localStorage.setItem('theme', next); } catch (e) {}
+        document.documentElement.setAttribute('data-theme', next);
+        updateIcon();
+      });
+      updateIcon();
+    })();
+  </script>
+</body>
+</html>
