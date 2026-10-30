@@ -346,6 +346,83 @@
     min-height: 1.3em;
   }
 
+  /* Trivia leaderboard (only shown once LEADERBOARD_URL is set and the backend answers) */
+  .lb { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--card-border); }
+  .lb[hidden], .lb-join[hidden] { display: none; }
+
+  .lb-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+  .lb-top .trivia-eyebrow { margin: 0; }
+  .lb-tabs { display: flex; gap: 6px; }
+  .lb-tab {
+    font-family: 'Public Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 11px;
+    border: 1px solid var(--card-border);
+    border-radius: 999px;
+    background: var(--paper);
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .lb-tab[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .lb-tab:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .lb-join { margin: 0 0 16px; }
+  .lb-join p { margin: 0 0 8px; font-size: 13px; color: var(--ink-soft); }
+  .lb-join .lb-msg { margin: 6px 0 0; min-height: 1.3em; color: var(--down); font-weight: 600; }
+  .lb-form { display: flex; gap: 8px; }
+  .lb-form input {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 12px;
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Public Sans', sans-serif;
+    font-size: 14px;
+  }
+  .lb-form input:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+  .lb-form button {
+    padding: 9px 18px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-family: 'Public Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .lb-form button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .lb-list { list-style: none; margin: 0; padding: 0; }
+  .lb-row {
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr) 58px 58px 46px;
+    gap: 8px;
+    align-items: center;
+    padding: 7px 8px;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  .lb-row.head {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .lb-row.me { background: var(--accent-soft); font-weight: 600; }
+  .lb-row .rank { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .lb-row .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lb-row .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .lb-empty { margin: 0; padding: 6px 8px; font-size: 13px; color: var(--ink-soft); }
+  .lb-you { margin: 12px 0 0; font-size: 13px; font-weight: 600; }
+  .lb-note { margin: 4px 0 0; font-size: 12px; color: var(--ink-soft); }
+
   .confetti-piece {
     position: fixed;
     top: -12px;
@@ -739,6 +816,28 @@
       <p class="trivia-question" id="triviaQuestion"></p>
       <div class="trivia-options" id="triviaOptions"></div>
       <p class="trivia-status" id="triviaStatus"></p>
+
+      <div class="lb" id="lb" hidden>
+        <form class="lb-join" id="lbJoin" hidden>
+          <p>Pick a nickname to join the leaderboard. Only your nickname is shown.</p>
+          <div class="lb-form">
+            <input id="lbName" type="text" maxlength="16" autocomplete="off" placeholder="Nickname" aria-label="Nickname">
+            <button type="submit">Join</button>
+          </div>
+          <p class="lb-msg" id="lbMsg" role="status"></p>
+        </form>
+        <div class="lb-top">
+          <p class="trivia-eyebrow">Leaderboard</p>
+          <div class="lb-tabs">
+            <button type="button" class="lb-tab" data-sort="streak" aria-pressed="true">Streak</button>
+            <button type="button" class="lb-tab" data-sort="correct" aria-pressed="false">Correct</button>
+          </div>
+        </div>
+        <div class="lb-row head" aria-hidden="true"><span></span><span>Player</span><span class="num">Streak</span><span class="num">Correct</span><span class="num">Best</span></div>
+        <ol class="lb-list" id="lbList"></ol>
+        <p class="lb-you" id="lbYou"></p>
+        <p class="lb-note">Only a correct first pick counts. Streak is days in a row.</p>
+      </div>
     </section>
 
     <footer>Sign in with your Riverbend Schools account when prompted.</footer>
@@ -2073,13 +2172,18 @@
       }
     })();
 
-    // Tech trivia of the day -- no backend, so "daily" just means the
-    // pick is seeded by today's date (day of year), the same for every
-    // visitor on a given day, cycling through the list on repeat forever
-    // with zero upkeep. Multiple choice: a wrong pick just greys out and
-    // disables that option so you keep narrowing it down; the right pick
-    // fires confetti.
+    // Tech trivia of the day. "Daily" just means the pick is seeded by today's date (day of year),
+    // the same for every visitor on a given day, cycling through the list forever with zero upkeep.
+    // Multiple choice: a wrong pick greys out and disables that option so you keep narrowing it
+    // down; the right pick fires confetti. Today's progress is remembered in this browser.
+    //
+    // Optional leaderboard: only a correct FIRST pick counts toward the score and the streak. Scores
+    // live in a Google Sheet behind an Apps Script web app (see "Trivia Leaderboard/DEPLOY.md").
+    // Players are a nickname plus a random id kept in localStorage; no sign-in.
     (function () {
+      // Paste the web app's /exec URL here. Left empty, the leaderboard simply doesn't appear.
+      var LEADERBOARD_URL = '';
+
       var trivia = [
         { q: 'What does "HTTP" stand for?', options: ['High Transfer Text Protocol', 'HyperText Transfer Protocol', 'Home Tool Transfer Protocol', 'HyperText Transport Program'], correct: 1 },
         { q: 'In what year was the first iPhone released?', options: ['2005', '2009', '2007', '2010'], correct: 2 },
@@ -2142,30 +2246,188 @@
       var startOfYear = new Date(now.getFullYear(), 0, 0);
       var dayOfYear = Math.floor((now - startOfYear) / 86400000);
       var pick = trivia[dayOfYear % trivia.length];
+      function pad(n) { return (n < 10 ? '0' : '') + n; }
+      var todayKey = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
 
+      function load(key) { try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; } }
+      function save(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {} }
+
+      var player = load('trivia.player');                 // { id, name } once joined
+      if (!player || !player.id) player = null;
+      var day = load('trivia.day');                       // today's progress in this browser
+      if (!day || day.date !== todayKey) day = { date: todayKey, first: null, wrong: [], solved: false, sent: false };
+      var me = null;                                      // our stats, as the server sees them
+      var board = [];
+      var sortKey = 'streak';
+
+      // ---- the question
       qEl.textContent = pick.q;
 
-      var solved = false;
+      function showStatus() {
+        var text = '';
+        if (day.solved) {
+          text = day.first ? 'Correct on the first try!' : 'Correct!';
+          if (day.first && me && me.playedToday && me.streak > 0) text += ' ' + me.streak + '-day streak.';
+          if (!day.first && me) text += ' Only first-try answers count toward your streak.';
+        }
+        statusEl.textContent = text;
+      }
+
       pick.options.forEach(function (optionText, i) {
         var optBtn = document.createElement('button');
         optBtn.type = 'button';
         optBtn.className = 'trivia-option';
         optBtn.textContent = optionText;
+        if (day.wrong.indexOf(i) !== -1) { optBtn.classList.add('wrong'); optBtn.disabled = true; }
+        if (day.solved) {
+          optBtn.disabled = true;
+          if (i === pick.correct) optBtn.classList.add('correct');
+        }
         optBtn.addEventListener('click', function () {
-          if (solved) return;
-          if (i === pick.correct) {
-            solved = true;
+          if (day.solved) return;
+          var right = i === pick.correct;
+          if (day.first === null) { day.first = right; report(); }   // only the first pick is scored
+          if (right) {
+            day.solved = true;
             optBtn.classList.add('correct');
             Array.prototype.forEach.call(optionsEl.children, function (b) { b.disabled = true; });
-            statusEl.textContent = 'Correct!';
             launchConfetti();
           } else {
+            day.wrong.push(i);
             optBtn.classList.add('wrong');
             optBtn.disabled = true;
           }
+          save('trivia.day', day);
+          showStatus();
         });
         optionsEl.appendChild(optBtn);
       });
+      showStatus();
+
+      // ---- the leaderboard
+      var lbEl = document.getElementById('lb');
+      if (!LEADERBOARD_URL || !lbEl || !window.fetch) return;
+      var joinEl = document.getElementById('lbJoin');
+      var nameEl = document.getElementById('lbName');
+      var msgEl = document.getElementById('lbMsg');
+      var listEl = document.getElementById('lbList');
+      var youEl = document.getElementById('lbYou');
+      var pendingId = null;
+
+      function call(body) {
+        // text/plain keeps this a "simple" request, so the browser skips the CORS preflight
+        // that Apps Script web apps cannot answer.
+        return fetch(LEADERBOARD_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(body)
+        }).then(function (r) { return r.json(); });
+      }
+
+      function newId() {
+        var bytes = new Uint8Array(16);
+        window.crypto.getRandomValues(bytes);
+        return Array.prototype.map.call(bytes, function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+      }
+
+      // Tell the server how today's first pick went (once, and only if we have joined).
+      function report() {
+        if (!player || day.first === null || day.sent) return Promise.resolve();
+        return call({ action: 'result', id: player.id, firstTry: day.first }).then(function (r) {
+          if (r.ok) {
+            day.sent = true;
+            save('trivia.day', day);
+            me = r.me;
+            showStatus();
+            refresh();
+          } else if (r.error === 'Join the leaderboard first.') {
+            me = null;                                  // the server has forgotten us: offer to join again
+            renderAll();
+          }
+        }).catch(function () {});
+      }
+
+      function refresh() {
+        return call({ action: 'board', id: player ? player.id : undefined }).then(function (r) {
+          if (!r.ok) return;
+          board = r.players || [];
+          me = r.me || null;
+          if (me && me.playedToday && day.first !== null && !day.sent) { day.sent = true; save('trivia.day', day); }
+          lbEl.hidden = false;
+          renderAll();
+        }).catch(function () {});                       // backend down: the page just carries on without it
+      }
+
+      function renderAll() { showStatus(); renderJoin(); renderBoard(); }
+
+      function renderJoin() {
+        joinEl.hidden = !!me;
+        if (!me && player && !nameEl.value) nameEl.value = player.name || '';
+      }
+
+      function renderBoard() {
+        var rows = board.slice().sort(function (a, b) {
+          var keys = sortKey === 'streak' ? ['streak', 'correct', 'best'] : ['correct', 'best', 'streak'];
+          for (var k = 0; k < keys.length; k++) if (a[keys[k]] !== b[keys[k]]) return b[keys[k]] - a[keys[k]];
+          return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
+        });
+        var mine = me ? me.name.toLowerCase() : null;
+        listEl.textContent = '';
+        if (!rows.length) {
+          var empty = document.createElement('li');
+          empty.className = 'lb-empty';
+          empty.textContent = 'Nobody yet. Answer today\u2019s question and be the first!';
+          listEl.appendChild(empty);
+        }
+        rows.forEach(function (p, idx) {
+          var isMe = p.name.toLowerCase() === mine;
+          if (idx >= 10 && !isMe) return;
+          var li = document.createElement('li');
+          li.className = 'lb-row' + (isMe ? ' me' : '');
+          [[idx + 1, 'rank'], [p.name, 'name'], [p.streak, 'num'], [p.correct, 'num'], [p.best, 'num']].forEach(function (cell) {
+            var span = document.createElement('span');
+            span.className = cell[1];
+            span.textContent = cell[0];
+            li.appendChild(span);
+          });
+          listEl.appendChild(li);
+        });
+
+        youEl.textContent = '';
+        if (me) {
+          var line = 'You: ' + me.streak + '-day streak, ' + me.correct + ' correct, best streak ' + me.best + '.';
+          if (me.streak > 0 && !me.playedToday && day.first === null) line += ' Answer today\u2019s question to keep it going.';
+          youEl.textContent = line;
+        }
+      }
+
+      Array.prototype.forEach.call(lbEl.querySelectorAll('.lb-tab'), function (tab) {
+        tab.addEventListener('click', function () {
+          sortKey = tab.getAttribute('data-sort');
+          Array.prototype.forEach.call(lbEl.querySelectorAll('.lb-tab'), function (t) {
+            t.setAttribute('aria-pressed', t === tab ? 'true' : 'false');
+          });
+          renderBoard();
+        });
+      });
+
+      joinEl.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var name = nameEl.value.trim();
+        if (!name) return;
+        msgEl.textContent = '';
+        var id = player ? player.id : (pendingId = pendingId || newId());
+        call({ action: 'join', id: id, name: name }).then(function (r) {
+          if (!r.ok) { msgEl.textContent = r.error || 'Could not join. Try again.'; return; }
+          player = { id: id, name: r.me.name };
+          save('trivia.player', player);
+          me = r.me;
+          renderAll();
+          return report().then(refresh);               // counts today's answer too, if they already gave one
+        }).catch(function () { msgEl.textContent = 'Could not reach the leaderboard. Try again.'; });
+      });
+
+      refresh();
     })();
   </script>
 </body>
